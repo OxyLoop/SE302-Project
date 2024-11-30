@@ -96,21 +96,21 @@ public class SchoolLecturePlanner {
     public void listCourses() {
         System.out.println("Courses:");
         for (Course course : courses) {
-            System.out.println(course);
+            System.out.println(course.getName());
         }
     }
 
     public void listStudents() {
         System.out.println("Students:");
         for (Student student : students) {
-            System.out.println(student);
+            System.out.println(student.getName());
         }
     }
 
     public void listClassrooms() {
         System.out.println("Classrooms:");
         for (Classroom classroom : classrooms) {
-            System.out.println(classroom);
+            System.out.println(classroom.getName());
         }
     }
 

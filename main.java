@@ -1,6 +1,5 @@
 public class main {
-    public static void main(
-            String[] args) {
+    public static void main(String[] args) {
          SchoolLecturePlanner planner = new SchoolLecturePlanner();
 
          planner.addClassroom(1, "A101", 30);
