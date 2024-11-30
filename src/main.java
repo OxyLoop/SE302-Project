@@ -1,5 +1,28 @@
-public class main {
+import javafx.application.Application;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.layout.StackPane;
+import javafx.stage.Stage;
+
+public class main extends Application{
+     @Override
+    public void start(Stage primaryStage) {
+        // Create a button
+        Button button = new Button("Click Me!");
+        button.setOnAction(e -> System.out.println("Hello, JavaFX!"));
+
+        // Create a layout and add the button
+        StackPane layout = new StackPane();
+        layout.getChildren().add(button);
+
+        // Create a scene and set it to the stage
+        Scene scene = new Scene(layout, 300, 200);
+        primaryStage.setTitle("Hello JavaFX");
+        primaryStage.setScene(scene);
+        primaryStage.show();
+    }
     public static void main(String[] args) {
+        launch(args);
          SchoolLecturePlanner planner = new SchoolLecturePlanner();
 
          planner.addClassroom(1, "A101", 30);
