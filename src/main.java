@@ -1,10 +1,6 @@
-import javafx.application.Application;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.layout.StackPane;
-import javafx.stage.Stage;
 
-public class main extends Application{
+
+/*public class main extends Application{
      @Override
     public void start(Stage primaryStage) {
         // Create a button
@@ -20,9 +16,10 @@ public class main extends Application{
         primaryStage.setTitle("Hello JavaFX");
         primaryStage.setScene(scene);
         primaryStage.show();
-    }
+    }*/
+public class main {
     public static void main(String[] args) {
-        launch(args);
+        //launch(args);
          SchoolLecturePlanner planner = new SchoolLecturePlanner();
 
          planner.addClassroom(1, "A101", 30);
@@ -54,6 +51,27 @@ public class main extends Application{
         planner.listCourses();
         System.out.println("-- Güncel class list --");
         planner.listClassrooms();
+
+
+        //csvden cekme testleri lutfen sonra silin!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                planner.loadClassrooms("data/ClassroomCapacity.csv"); //CSVLER DATA FOLDERINDA !!!!!!!!!!
+                planner.loadCourses("data/Courses.csv");
+
+                // Print loaded data for verification
+                for (Classroom classroom : planner.classrooms) {
+                    System.out.println("Classroom: " + classroom.getName() + ", Capacity: " + classroom.getCapacity() + ", Available: " + classroom.isAvailable());
+                }
+                for (Course course : planner.courses) {
+                    System.out.println("Course: " + course.getName() + ", Timing: " + course.getTiming() + ", Lecturer: " + course.getLecturer() + ", Classroom: " + course.getClassroom());
+                }
+                for (Student student : planner.students) {
+                    System.out.print("Student: " + student.getName() + " (ID: " + student.getId() + ") Enrolled Courses: ");
+                    for (Course course : student.getEnrolledCourses()) {
+                        System.out.print(course.getName() + " ");
+                    }
+                    System.out.println();
+                }
+
     }
 }
 

@@ -1,19 +1,34 @@
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class SchoolLecturePlanner {
 
-    private List<Student> students;
-    private List<Classroom> classrooms;
-    private List<Course> courses;
-
+    List<Student> students;
+    List<Classroom> classrooms;
+    List<Course> courses;
+    private Map<String, Course> courseMap; // Course code to Course object map
+    private Map<String, Student> studentMap; // Student name to Student object map
+    private CSVLoader csvLoader;
 
     public SchoolLecturePlanner() {
         this.students = new ArrayList<>();
         this.classrooms = new ArrayList<>();
         this.courses = new ArrayList<>();
+        this.courseMap = new HashMap<>();
+        this.studentMap = new HashMap<>();
+        this.csvLoader = new CSVLoader();
     }
 
+    public void loadClassrooms(String filename) {
+        csvLoader.loadClassrooms(filename, classrooms);
+    }
+
+    public void loadCourses(String filename) {
+        csvLoader.loadCourses(filename, courses, classrooms, courseMap, studentMap);
+        students.addAll(studentMap.values());
+    }
 
     public void addCourse(String name, String code, String lecturer, String timing, String classroomName) {
         Classroom classroom = findClassroomByName(classroomName);
@@ -40,7 +55,7 @@ public class SchoolLecturePlanner {
             System.out.println("Course not found!");
         }
     }
-//
+
     public Course findCourseByCode(String code) {
         for (Course course : courses) {
             if (course.getCode().equals(code)) {
@@ -50,7 +65,7 @@ public class SchoolLecturePlanner {
         return null;
     }
 
-     public void addStudent(int id, String name) {
+    public void addStudent(int id, String name) {
         Student student = new Student(id, name);
         students.add(student);
         System.out.println("Student added: " + student);
@@ -75,7 +90,6 @@ public class SchoolLecturePlanner {
         }
         return null;
     }
-
 
     public void addClassroom(int id, String name, int capacity) {
         Classroom classroom = new Classroom(id, name, capacity, true);
