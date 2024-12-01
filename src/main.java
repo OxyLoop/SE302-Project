@@ -1,7 +1,11 @@
+import javafx.application.Application;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.layout.StackPane;
+import javafx.stage.Stage;
 
-
-/*public class main extends Application{
-     @Override
+public class main extends Application {
+    @Override
     public void start(Stage primaryStage) {
         // Create a button
         Button button = new Button("Click Me!");
@@ -16,62 +20,62 @@
         primaryStage.setTitle("Hello JavaFX");
         primaryStage.setScene(scene);
         primaryStage.show();
-    }*/
-public class main {
-    public static void main(String[] args) {
-        //launch(args);
-         SchoolLecturePlanner planner = new SchoolLecturePlanner();
 
-         planner.addClassroom(1, "A101", 30);
-        planner.addClassroom(2, "B202", 25);
+        public static void main (String[]args){
+            //launch(args);
+            SchoolLecturePlanner planner = new SchoolLecturePlanner();
 
-         planner.addCourse("Math 101", "MATH101", "Dr. Smith", "09:00-11:00", "A101");
-        planner.addCourse("Physics 101", "PHYS101", "Dr. Brown", "11:00-13:00", "B202");
+            planner.addClassroom(1, "A101", 30);
+            planner.addClassroom(2, "B202", 25);
 
-         planner.addStudent(1, "Alice");
-        planner.addStudent(2, "Bob");
+            planner.addCourse("Math 101", "MATH101", "Dr. Smith", "09:00-11:00", "A101");
+            planner.addCourse("Physics 101", "PHYS101", "Dr. Brown", "11:00-13:00", "B202");
 
-         planner.enrollStudentToCourse(1, "MATH101");
-        planner.enrollStudentToCourse(2, "PHYS101");
+            planner.addStudent(1, "Alice");
+            planner.addStudent(2, "Bob");
 
-         System.out.println("-- al lessons --");
-        planner.listCourses();
+            planner.enrollStudentToCourse(1, "MATH101");
+            planner.enrollStudentToCourse(2, "PHYS101");
 
-        System.out.println("-- all stnds --");
-        planner.listStudents();
+            System.out.println("-- al lessons --");
+            planner.listCourses();
 
-        System.out.println("-- all clss --");
-        planner.listClassrooms();
+            System.out.println("-- all stnds --");
+            planner.listStudents();
 
-
-        System.out.println("removemath101");
-        planner.removeCourse("MATH101");
-
-         System.out.println("-- güncel lesson list --");
-        planner.listCourses();
-        System.out.println("-- Güncel class list --");
-        planner.listClassrooms();
+            System.out.println("-- all clss --");
+            planner.listClassrooms();
 
 
-        //csvden cekme testleri lutfen sonra silin!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                planner.loadClassrooms("data/ClassroomCapacity.csv"); //CSVLER DATA FOLDERINDA !!!!!!!!!!
-                planner.loadCourses("data/Courses.csv");
+            System.out.println("removemath101");
+            planner.removeCourse("MATH101");
 
-                // Print loaded data for verification
-                for (Classroom classroom : planner.classrooms) {
-                    System.out.println("Classroom: " + classroom.getName() + ", Capacity: " + classroom.getCapacity() + ", Available: " + classroom.isAvailable());
+            System.out.println("-- güncel lesson list --");
+            planner.listCourses();
+            System.out.println("-- Güncel class list --");
+            planner.listClassrooms();
+
+
+            //csvden cekme testleri lutfen sonra silin!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            planner.loadClassrooms("data/ClassroomCapacity.csv"); //CSVLER DATA FOLDERINDA !!!!!!!!!!
+            planner.loadCourses("data/Courses.csv");
+
+            // Print loaded data for verification
+            for (Classroom classroom : planner.classrooms) {
+                System.out.println("Classroom: " + classroom.getName() + ", Capacity: " + classroom.getCapacity() + ", Available: " + classroom.isAvailable());
+            }
+            for (Course course : planner.courses) {
+                System.out.println("Course: " + course.getName() + ", Timing: " + course.getTiming() + ", Lecturer: " + course.getLecturer() + ", Classroom: " + course.getClassroom());
+            }
+            for (Student student : planner.students) {
+                System.out.print("Student: " + student.getName() + " (ID: " + student.getId() + ") Enrolled Courses: ");
+                for (Course course : student.getEnrolledCourses()) {
+                    System.out.print(course.getName() + " ");
                 }
-                for (Course course : planner.courses) {
-                    System.out.println("Course: " + course.getName() + ", Timing: " + course.getTiming() + ", Lecturer: " + course.getLecturer() + ", Classroom: " + course.getClassroom());
-                }
-                for (Student student : planner.students) {
-                    System.out.print("Student: " + student.getName() + " (ID: " + student.getId() + ") Enrolled Courses: ");
-                    for (Course course : student.getEnrolledCourses()) {
-                        System.out.print(course.getName() + " ");
-                    }
-                    System.out.println();
-                }
+                System.out.println();
+            }
 
+        }
     }
 }
 
