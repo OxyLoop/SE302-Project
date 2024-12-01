@@ -3,7 +3,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
 
 public class CSVLoader {
 
@@ -32,7 +31,7 @@ public class CSVLoader {
                     String name = data[0];
                     String timing = data[1];
                     String lecturer = data[3];
-                    String[] studentNames = data[4].split(";"); // Students start from the 5th column
+                    String[] studentNames = extractStudentNames(data);
                     String classroomName = findAvailableClassroom(classrooms);
                     if (classroomName == null) {
                         System.out.println("No available classroom for course: " + name);
@@ -48,6 +47,13 @@ public class CSVLoader {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private String[] extractStudentNames(String[] data) {
+        // Extract students starting from the 5th column onwards
+        String[] studentNames = new String[data.length - 4];
+        System.arraycopy(data, 4, studentNames, 0, studentNames.length);
+        return studentNames;
     }
 
     private void assignStudentsToCourse(String[] studentNames, Course course, Map<String, Student> studentMap) {
