@@ -78,24 +78,20 @@ public class main extends Application {
     //SEARCHED CLASS TAB
     private void searchWindow(String searchText) {
         Stage newWindow = new Stage();
-        VBox vbox = new VBox(10);
-        vbox.setStyle("-fx-alignment: top-center; -fx-padding: 20;");
-        vbox.setAlignment(Pos.TOP_CENTER);
-
-        Label message = new Label("Details Of Lesson " + searchText);
-        message.setStyle("-fx-font-size: 16px; -fx-text-fill: #001f3f;");
-        vbox.getChildren().add(message);
-
-        Scene newScene = new Scene(vbox, 300, 200);
-        newWindow.setTitle("Lesson Details");
-        newWindow.setScene(newScene);
+        TimetableEntry timetableEntry = new TimetableEntry();
+        try {
+            timetableEntry.start(newWindow); // Use the start method of TimetableEntry to initialize the new tab
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    
+        newWindow.setTitle("Timetable Search Result: " + searchText);
         newWindow.show();
     }
 
     //FOUND CLASS TAB
-    private void timetableWindow(){
-        Stage newWindow = new Stage();
-        
+    private void timetableWindow(String[] args){
+        TimetableEntry.launch(TimetableEntry.class, args);
     }
 
     private void openAddCourseWindow() {
