@@ -1,7 +1,10 @@
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class SchoolLecturePlanner {
 
@@ -30,25 +33,86 @@ public class SchoolLecturePlanner {
         students.addAll(studentMap.values());
     }
 
+    public boolean isClassroomAvailable(String classroomName, String timing) {
+        for (Course course : courses) {
+            if (course.getClassroom().equals(classroomName) && course.getTiming().equals(timing)) {
+                return false; 
+            }
+        }
+        return true;
+    }
+    
+
+    // bu fonksiyon öğrencilerin ortak zamanını görmek için.  GUI de bunun için buton olmalı ordan öğrenciler seçilebilmeli ve ortak zamanları bulunmalı
+    public List<String> findJointFreeTimes(List<Integer> studentIds) { 
+        List<Course> allEnrolledCourses = new ArrayList<>();
+        for (int studentId : studentIds) {
+            Student student = findStudentById(studentId);
+            if (student != null) {
+                allEnrolledCourses.addAll(student.getEnrolledCourses());
+            }
+        }
+    
+        
+        List<String> allTimeSlots = new ArrayList<>(Arrays.asList(
+            "08:30", "09:25", "10:20", "11:15", "12:10", "13:05", "14:00", "14:55", "15:50", 
+            "16:45", "17:40", "18:35", "19:30", "20:25", "21:20", "22:15"
+        ));
+    
+        
+        Set<String> busyTimes = new HashSet<>();
+        for (Course course : allEnrolledCourses) {
+            busyTimes.add(course.getTiming()); 
+        }
+    
+        
+        allTimeSlots.removeAll(busyTimes);
+    
+        return allTimeSlots; 
+    }
+    
+
+
     public void addCourse(String name, String code, String lecturer, String timing, String classroomName) {
         Classroom classroom = findClassroomByName(classroomName);
-        if (classroom == null || !classroom.isAvailable()) {
-            System.out.println("Classroom is not available or does not exist!");
+        if (classroom == null) {
+            System.out.println("Classroom does not exist!");
             return;
         }
+        if (!classroom.isAvailable()) {
+            System.out.println("Classroom is not available!");
+            return;
+        }
+    
+        
+        if (isClassroomAvailable(timing, classroomName)) {
+            System.out.println("Scheduling conflict detected! Another course is already scheduled in this classroom at this time.");
+            return;
+        }
+    
+    
         Course course = new Course(name, code, lecturer, timing, classroomName);
         courses.add(course);
-        classroom.setAvailable(false);
+        classroom.setAvailable(false); 
+        courseMap.put(code, course); 
         System.out.println("Course added: " + course);
+    
+    
     }
-
+    
     public void removeCourse(String code) {
         Course courseToRemove = findCourseByCode(code);
         if (courseToRemove != null) {
             courses.remove(courseToRemove);
             Classroom classroom = findClassroomByName(courseToRemove.getClassroom());
             if (classroom != null) {
-                classroom.setAvailable(true);
+                if (isClassroomAvailable(courseToRemove.getClassroom(), courseToRemove.getTiming())) {
+                
+                    classroom.setAvailable(true);
+                } else {
+                    
+                    System.out.println("Classroom is still occupied by other courses at this time.");
+                }
             }
             System.out.println("Course removed: " + code);
         } else {
