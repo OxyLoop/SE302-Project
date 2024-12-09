@@ -80,7 +80,7 @@ public class main extends Application {
         Stage newWindow = new Stage();
         TimetableEntry timetableEntry = new TimetableEntry();
         try {
-            timetableEntry.start(newWindow); // Use the start method of TimetableEntry to initialize the new tab
+            timetableEntry.start(newWindow);
         } catch (Exception e) {
             e.printStackTrace();
         }
