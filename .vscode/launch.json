@@ -9,6 +9,13 @@
             "name": "main",
             "request": "launch",
             "mainClass": "main",
+            "projectName": "SE302-Project_ad2b749f"
+        },
+        {
+            "type": "java",
+            "name": "main",
+            "request": "launch",
+            "mainClass": "main",
             "projectName": "SE302-Project_1384ec63"
         },
         {
@@ -30,7 +37,7 @@
             "request": "launch",
             "mainClass": "main",
             "projectName": "SE302-Project_1384ec63",
-            "vmArgs": "--module-path \"c:\\Program Files\\Java\\javafx-sdk-21.0.2\\lib\" --add-modules javafx.controls,javafx.fxml"
+            "vmArgs": "--module-path \"C:\\Users\\akins\\Desktop\\javafx-sdk-21.0.2\\lib\" --add-modules javafx.controls,javafx.fxml"
         }
     ]
 }
