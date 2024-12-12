@@ -1,4 +1,6 @@
 
+import java.util.List;
+
 import javafx.application.Application;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -11,10 +13,16 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 //asdasdasdasd
 public class main extends Application {
+    
+    private SchoolLecturePlanner planner = new SchoolLecturePlanner(); // Declare planner globally
+
     @Override
     //MAIN TAB FOR APPLICATION
     public void start(Stage primaryStage) {
-     BorderPane root = new BorderPane();
+        planner.loadClassrooms("data/ClassroomCapacity.csv");
+        planner.loadCourses("data/Courses.csv");
+        
+        BorderPane root = new BorderPane();
         root.setStyle("-fx-background-color: #001f3f; -fx-padding: 20;");
 
         Button addCourseButton = new Button("Add Course");
@@ -77,8 +85,9 @@ public class main extends Application {
     }
     //SEARCHED CLASS TAB
     private void searchWindow(String searchText) {
+        List<Course> filteredCourses = planner.searchCourses(searchText);
         Stage newWindow = new Stage();
-        TimetableEntry timetableEntry = new TimetableEntry();
+        TimetableEntry timetableEntry = new TimetableEntry(filteredCourses, planner);
         try {
             timetableEntry.start(newWindow);
         } catch (Exception e) {
@@ -149,9 +158,11 @@ public class main extends Application {
     }
     public static void main (String[]args){
         launch(args);
-        SchoolLecturePlanner planner = new SchoolLecturePlanner();
+        //SchoolLecturePlanner planner = new SchoolLecturePlanner();
+        //planner.loadClassrooms("data/ClassroomCapacity.csv"); //CSVLER DATA FOLDERINDA !!!!!!!!!!
+        //planner.loadCourses("data/Courses.csv");
 
-        planner.addClassroom(1, "A101", 30);
+        /* planner.addClassroom(1, "A101", 30);
         planner.addClassroom(2, "B202", 25);
 
         planner.addCourse("Math 101", "MATH101", "Dr. Smith", "09:00-11:00", "A101");
@@ -187,7 +198,7 @@ public class main extends Application {
         planner.loadCourses("data/Courses.csv");
 
         // Print loaded data for verification
-        for (Classroom classroom : planner.classrooms) {
+       /*for (Classroom classroom : planner.classrooms) {
             System.out.println("Classroom: " + classroom.getName() + ", Capacity: " + classroom.getCapacity() + ", Available: " + classroom.isAvailable());
         }
         for (Course course : planner.courses) {
@@ -200,6 +211,7 @@ public class main extends Application {
             }
             System.out.println();
         }
+            */
         
 
     }

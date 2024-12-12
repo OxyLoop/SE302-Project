@@ -28,18 +28,18 @@ public class CSVLoader {
             while ((line = br.readLine()) != null) {
                 String[] data = line.split(";");
                 if (!data[0].equals("Course")) { // Skip header
-                    String name = data[0];
+                    String code = data[0];
                     String timing = data[1];
                     String lecturer = data[3];
                     String[] studentNames = extractStudentNames(data);
                     String classroomName = findAvailableClassroom(classrooms);
                     if (classroomName == null) {
-                        System.out.println("No available classroom for course: " + name);
+                        System.out.println("No available classroom for course: " + code);
                         continue;
                     }
-                    Course course = new Course(name, name, lecturer, timing, classroomName);
+                    Course course = new Course( code, lecturer, timing, classroomName);
                     courses.add(course);
-                    courseMap.put(name, course);
+                    courseMap.put(code, course);
                     assignCourseToClassroom(classroomName, classrooms, course);
                     assignStudentsToCourse(studentNames, course, studentMap);
                 }

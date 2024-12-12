@@ -33,18 +33,34 @@ public class SchoolLecturePlanner {
         students.addAll(studentMap.values());
     }
 
-    public boolean isClassroomAvailable(String classroomName, String timing) {
+    public boolean isClassroomAvailable(String classroomName, String day, String time) {
         for (Course course : courses) {
-            if (course.getClassroom().equals(classroomName) && course.getTiming().equals(timing)) {
+            
+            if (course.getClassroom().equals(classroomName) &&
+                course.getDay().equals(day) && 
+                course.getTime().equals(time)) {
                 return false; 
-            }
+              }
         }
-        return true;
+        return true; 
     }
     
+    public List<Course> searchCourses(String searchText) {
+        List<Course> matchingCourses = new ArrayList<>();
+        
+        // Search by course code
+        for (Course course : courses) {
+            if (course.getCode().toLowerCase().contains(searchText.toLowerCase())||
+                course.getLecturer().toLowerCase().contains(searchText.toLowerCase())) {
+                matchingCourses.add(course);
+            }
+        }
+        
+        return matchingCourses;
+    }
 
     // bu fonksiyon öğrencilerin ortak zamanını görmek için.  GUI de bunun için buton olmalı ordan öğrenciler seçilebilmeli ve ortak zamanları bulunmalı
-    public List<String> findJointFreeTimes(List<Integer> studentIds) { 
+    /*public List<String> findJointFreeTimes(List<Integer> studentIds) { 
         List<Course> allEnrolledCourses = new ArrayList<>();
         for (int studentId : studentIds) {
             Student student = findStudentById(studentId);
@@ -70,6 +86,7 @@ public class SchoolLecturePlanner {
     
         return allTimeSlots; 
     }
+        */
     
 
 
@@ -79,19 +96,20 @@ public class SchoolLecturePlanner {
             System.out.println("Classroom does not exist!");
             return;
         }
-        if (!classroom.isAvailable()) {
-            System.out.println("Classroom is not available!");
-            return;
-        }
-    
-        
-        if (isClassroomAvailable(timing, classroomName)) {
+        String[] timingParts = timing.split(" ");
+    if (timingParts.length != 2) {
+        System.out.println("Invalid timing format! It should be 'Day Time'.");
+        return;
+    }
+    String day = timingParts[0];
+    String time = timingParts[1];
+
+        if (!isClassroomAvailable(classroomName, day, time)) {
             System.out.println("Scheduling conflict detected! Another course is already scheduled in this classroom at this time.");
             return;
         }
     
-    
-        Course course = new Course(name, code, lecturer, timing, classroomName);
+        Course course = new Course(code, lecturer, timing, classroomName);
         courses.add(course);
         classroom.setAvailable(false); 
         courseMap.put(code, course); 
@@ -106,12 +124,8 @@ public class SchoolLecturePlanner {
             courses.remove(courseToRemove);
             Classroom classroom = findClassroomByName(courseToRemove.getClassroom());
             if (classroom != null) {
-                if (isClassroomAvailable(courseToRemove.getClassroom(), courseToRemove.getTiming())) {
-                
+                if (courses.stream().noneMatch(course -> course.getClassroom().equals(classroom.getName()))) {
                     classroom.setAvailable(true);
-                } else {
-                    
-                    System.out.println("Classroom is still occupied by other courses at this time.");
                 }
             }
             System.out.println("Course removed: " + code);
@@ -140,7 +154,7 @@ public class SchoolLecturePlanner {
         Course course = findCourseByCode(courseCode);
         if (student != null && course != null) {
             student.addCourse(course);
-            System.out.println("Student enrolled: " + student.getName() + " ---> " + course.getName());
+            System.out.println("Student enrolled: " + student.getName() + " ---> " + course.getCode());
         } else {
             System.out.println("Student or Course not found!");
         }
@@ -174,7 +188,7 @@ public class SchoolLecturePlanner {
     public void listCourses() {
         System.out.println("Courses:");
         for (Course course : courses) {
-            System.out.println(course.getName());
+            System.out.println(course.getCode());
         }
     }
 

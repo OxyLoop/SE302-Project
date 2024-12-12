@@ -1,3 +1,5 @@
+import java.util.List;
+
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -14,6 +16,8 @@ public class TimetableEntry extends Application {
     private String classroom;
     private String lecturer;
     private String time;
+    private List<Course> filteredCourses;
+    private SchoolLecturePlanner planner;
     
     
     public TimetableEntry() {
@@ -26,6 +30,10 @@ public class TimetableEntry extends Application {
         this.lecturer = lecturer;
         this.time = time;
     }
+    public TimetableEntry(List<Course> filteredCourses, SchoolLecturePlanner planner) {
+        this.filteredCourses = filteredCourses;
+        this.planner = planner;
+    }
     
     
     
@@ -35,7 +43,7 @@ public class TimetableEntry extends Application {
     gridPane.setGridLinesVisible(true); 
 
     
-    String[] days = {"Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"};
+    String[] days = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
     for (int col = 1; col <= days.length; col++) {
         Label dayLabel = new Label(days[col - 1]);
         dayLabel.setStyle("-fx-font-weight: bold; -fx-alignment: center; -fx-pref-width: 100;");
@@ -61,13 +69,17 @@ public class TimetableEntry extends Application {
             gridPane.add(cell, col, row);
         }
     }
+    for (Course course : filteredCourses) {
+        
+        addClassToGrid(gridPane, course.getCode(), getColumnForDay(course.getDay()), getRowForTime(course.getTime()), 1);
+    }
 
     // Gpt yazdığı test cases
-    addClassToGrid(gridPane, "CE 323", 2, 1, 1); // Salı 08:30-10:20
+   /* addClassToGrid(gridPane, "CE 323", 2, 1, 1); // Salı 08:30-10:20
     addClassToGrid(gridPane, "EEE 242", 2, 5, 1); // Salı 12:10-13:05
     addClassToGrid(gridPane, "CE 315", 4, 1, 1); // Perşembe 08:30-09:25
     addClassToGrid(gridPane, "MATH 250", 5, 4, 1); // Cuma 11:15-13:05
-    addClassToGrid(gridPane, "SE 302", 5, 8, 1); // Cuma 14:00-16:45
+    addClassToGrid(gridPane, "SE 302", 5, 8, 1); // Cuma 14:00-16:45*/ 
 
     gridPane.setHgap(1);
     gridPane.setVgap(1);
@@ -92,7 +104,7 @@ public class TimetableEntry extends Application {
             testTab();
         });
         
-        gridPane.add(classButton, col, row, 1, rowSpan);
+        gridPane.add(classButton, col, row+1, 1, rowSpan);
     }
 
     private void testTab() {
@@ -114,6 +126,41 @@ public class TimetableEntry extends Application {
         newWindow.setScene(newScene);
         newWindow.setTitle("Test Tab");
         newWindow.show(); 
+    }
+
+    private int getColumnForDay(String day) {
+        switch (day) {
+            case "Monday": return 1;
+            case "Tuesday": return 2;
+            case "Wednesday": return 3;
+            case "Thursday": return 4;
+            case "Friday": return 5;
+            case "Saturday": return 6;
+            case "Sunday": return 7;
+            default: return 0;
+        }
+    }
+
+    private int getRowForTime(String time) {
+        switch (time) {
+            case "08:30": return 2;
+            case "09:25": return 3;
+            case "10:20": return 4;
+            case "11:15": return 5;
+            case "12:10": return 6;
+            case "13:05": return 7;
+            case "14:00": return 8;
+            case "14:55": return 9;
+            case "15:50": return 10;
+            case "16:45": return 11;
+            case "17:40": return 12;
+            case "18:35": return 13;
+            case "19:30": return 14;
+            case "20:25": return 15;
+            case "21:20": return 16;
+            case "22:15": return 17;
+            default: return 0;
+        }
     }
     
     public String getDay() {

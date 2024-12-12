@@ -1,26 +1,29 @@
 public class Course {
-    private String name;
+    
     private String code;
     private String lecturer;
-    private String timing;
+    private String day;
+    private String time;
     private String classroom;
-// push test
 
-    public Course(String name, String code, String lecturer, String timing, String classroom) {
-        this.name = name;
+
+    public Course(String code, String lecturer, String timing, String classroomName) {
         this.code = code;
         this.lecturer = lecturer;
-        this.timing = timing;
+        setDayAndTime(timing);
         this.classroom = classroom;
     }
 
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
+    private void setDayAndTime(String timing) {
+        String[] splitTiming = timing.split(" "); 
+        if (splitTiming.length == 2) {
+            this.day = splitTiming[0];
+            this.time = splitTiming[1];
+        } else {
+            this.day = "";
+            this.time = timing;  
+        }
     }
 
     public String getCode() {
@@ -39,12 +42,12 @@ public class Course {
         this.lecturer = lecturer;
     }
 
-    public String getTiming() {
-        return timing;
+    public String getDay() {
+        return day;
     }
 
-    public void setTiming(String timing) {
-        this.timing = timing;
+    public String getTime() {
+        return time;
     }
 
     public String getClassroom() {
