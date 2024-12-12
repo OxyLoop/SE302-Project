@@ -9,7 +9,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-
+//asdasdasdasd
 public class main extends Application {
     @Override
     //MAIN TAB FOR APPLICATION
@@ -77,38 +77,21 @@ public class main extends Application {
     }
     //SEARCHED CLASS TAB
     private void searchWindow(String searchText) {
-        
-        SchoolLecturePlanner planner = new SchoolLecturePlanner(); 
-    
         Stage newWindow = new Stage();
-        VBox vbox = new VBox(10);
-        vbox.setStyle("-fx-alignment: top-center; -fx-padding: 20;");
-        vbox.setAlignment(Pos.TOP_CENTER);
-    
-        Label message;
-        Course course = planner.findCourseByCode(searchText); 
-        if (course != null) {
-            message = new Label("Details of Lesson: " + searchText + "\n" +
-                    "Lecturer: " + course.getLecturer() + "\n" +
-                    "Timing: " + course.getTiming() + "\n" +
-                    "Classroom: " + course.getClassroom());
-        } else {
-            message = new Label("Course not found: " + searchText);
+        TimetableEntry timetableEntry = new TimetableEntry();
+        try {
+            timetableEntry.start(newWindow);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        message.setStyle("-fx-font-size: 16px; -fx-text-fill: #001f3f;");
-        vbox.getChildren().add(message);
     
-        Scene newScene = new Scene(vbox, 300, 200);
-        newWindow.setTitle("Search Results");
-        newWindow.setScene(newScene);
+        newWindow.setTitle("Timetable Search Result: " + searchText);
         newWindow.show();
     }
-    
 
     //FOUND CLASS TAB
-    private void timetableWindow(){
-        Stage newWindow = new Stage();
-        
+    private void timetableWindow(String[] args){
+        TimetableEntry.launch(TimetableEntry.class, args);
     }
 
     private void openAddCourseWindow() {
