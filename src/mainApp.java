@@ -8,11 +8,12 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 //asdasdasdasd
-public class main extends Application {
+public class mainApp extends Application {
     
     private SchoolLecturePlanner planner = new SchoolLecturePlanner(); // Declare planner globally
 
@@ -48,20 +49,10 @@ public class main extends Application {
             "-fx-text-fill: #ffffff;" +
             "-fx-padding: 10;"
         );
-
-        TextField searchBar = new TextField();
-        searchBar.setPromptText("Search for classes");
-        searchBar.setStyle(
-            "-fx-font-size: 14px;" +
-            "-fx-alignment: center;" +
-            "-fx-border-radius: 10;" +
-            "-fx-background-radius: 10;" +
-            "-fx-padding: 5 50 5 50;"
-        );
-        searchBar.setPrefColumnCount(10);
-
-        Button searchButton = new Button("Search");
-        searchButton.setStyle(
+        
+        //Students button
+        Button studentButton = new Button("Students");
+        studentButton.setStyle(
             "-fx-font-size: 14px;" +
             "-fx-background-color: white;" +
             "-fx-text-fill: #001f3f;" +
@@ -69,39 +60,56 @@ public class main extends Application {
             "-fx-background-radius: 10;" +
             "-fx-padding: 5 20;"
         );
-        searchButton.setOnAction(event -> {
-            String searchText = searchBar.getText();
-            searchWindow(searchText);
+        studentButton.setOnAction(event -> {
+            ListingTab studentListTab = new ListingTab(planner, "students"); 
+            studentListTab.show();
         });
 
-        vbox.getChildren().addAll(title, searchBar, searchButton);
+        // Lectures Button
+        Button lecturesButton = new Button("Lectures");
+        lecturesButton.setStyle(
+            "-fx-font-size: 14px;" +
+            "-fx-background-color: white;" +
+            "-fx-text-fill: #001f3f;" +
+            "-fx-border-radius: 10;" +
+            "-fx-background-radius: 10;" +
+            "-fx-padding: 5 20;"
+        );
+        lecturesButton.setOnAction(event -> {
+            ListingTab listingTab = new ListingTab(planner, "lectures");
+            listingTab.show();
+        });
+
+        // Classrooms Button
+        Button classroomsButton = new Button("Classrooms");
+        classroomsButton.setStyle(
+            "-fx-font-size: 14px;" +
+            "-fx-background-color: white;" +
+            "-fx-text-fill: #001f3f;" +
+            "-fx-border-radius: 10;" +
+            "-fx-background-radius: 10;" +
+            "-fx-padding: 5 20;"
+        );
+        classroomsButton.setOnAction(event -> {
+            ListingTab listingTab = new ListingTab(planner, "classrooms"); 
+            listingTab.show();
+        });
+
+        HBox buttonBox = new HBox(20); 
+        buttonBox.setAlignment(Pos.CENTER);
+        buttonBox.getChildren().addAll(studentButton, lecturesButton, classroomsButton);
+
+
+        vbox.getChildren().addAll(title,buttonBox);
 
         root.setCenter(vbox);
 
         Scene scene = new Scene(root, 400, 300);
-        primaryStage.setTitle("Timetable");
+        primaryStage.setTitle("School Management");
         primaryStage.setScene(scene);
         primaryStage.show();
     }
-    //SEARCHED CLASS TAB
-    private void searchWindow(String searchText) {
-        List<Course> filteredCourses = planner.searchCourses(searchText);
-        Stage newWindow = new Stage();
-        TimetableEntry timetableEntry = new TimetableEntry(filteredCourses, planner);
-        try {
-            timetableEntry.start(newWindow);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     
-        newWindow.setTitle("Timetable Search Result: " + searchText);
-        newWindow.show();
-    }
-
-    //FOUND CLASS TAB
-    private void timetableWindow(String[] args){
-        TimetableEntry.launch(TimetableEntry.class, args);
-    }
 
     private void openAddCourseWindow() {
         Stage newWindow = new Stage();

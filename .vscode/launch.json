@@ -6,27 +6,6 @@
     "configurations": [
         {
             "type": "java",
-            "name": "main",
-            "request": "launch",
-            "mainClass": "main",
-            "projectName": "SE302-Project_ad2b749f"
-        },
-        {
-            "type": "java",
-            "name": "main",
-            "request": "launch",
-            "mainClass": "main",
-            "projectName": "SE302-Project_1384ec63"
-        },
-        {
-            "type": "java",
-            "name": "App",
-            "request": "launch",
-            "mainClass": "App",
-            "projectName": "SE302-Project_1384ec63"
-        },
-        {
-            "type": "java",
             "name": "Current File",
             "request": "launch",
             "mainClass": "${file}"
@@ -35,15 +14,24 @@
             "type": "java",
             "name": "mainAppArda",
             "request": "launch",
-            "mainClass": "main",
+            "mainClass": "mainApp",
             "projectName": "SE302-Project_1384ec63",
-            "vmArgs": "--module-path \"C:\\Users\\akins\\Desktop\\javafx-sdk-21.0.2\\lib\" --add-modules javafx.controls,javafx.fxml"
+            "vmArgs": "--module-path \"C:/Program Files/Java/javafx-sdk-21.0.2/lib\" --add-modules javafx.controls,javafx.fxml"
+        },
+        //Akın buraya kendi adresini ekle ve run and debug kısmından bu configi seç
+        {
+            "type": "java",
+            "name": "mainAppAkin",
+            "request": "launch",
+            "mainClass": "mainApp",
+            "projectName": "SE302-Project_1384ec63",
+            "vmArgs": "--module-path \"\" --add-modules javafx.controls,javafx.fxml"
         },
         {
             "type": "java",
             "name": "mainAppİpek",
             "request": "launch",
-            "mainClass": "main",
+            "mainClass": "mainApp",
             "projectName": "SE302-Project_665164a7",
             "vmArgs": "--module-path \"/Users/ipeksudeyavas/Downloads/javafx-sdk-23.0.1/lib\" --add-modules javafx.controls,javafx.fxml"
         

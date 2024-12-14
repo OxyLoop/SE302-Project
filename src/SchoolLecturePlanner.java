@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class SchoolLecturePlanner {
 
@@ -167,6 +168,31 @@ public class SchoolLecturePlanner {
             }
         }
         return null;
+    }
+
+    public List<String> getAllStudentNames() {
+        List<String> studentNames = new ArrayList<>();
+        for (Student student : students) {
+            studentNames.add(student.getName());
+        }
+        return studentNames;
+    }
+
+    public Student findStudentByName(String name) {
+        for (Student student : students) {
+            if (student.getName().equalsIgnoreCase(name)) {
+                return student;
+            }
+        }
+        return null; 
+    }
+
+    public List<Course> getCourses() {
+    return courses; 
+    }
+
+    public List<Classroom> getClassrooms() {
+    return classrooms; 
     }
 
     public void addClassroom(int id, String name, int capacity) {
