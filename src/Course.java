@@ -2,7 +2,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Course {
-    
     private String code;
     private String lecturer;
     private String day;
@@ -11,7 +10,6 @@ public class Course {
     private int durationHours;
     private List<Student> enrolledStudents;
 
-    
     public Course(String code, String lecturer, String timing, int durationHours, String classroomName) {
         this.code = code;
         this.lecturer = lecturer;
@@ -64,8 +62,16 @@ public class Course {
         return day;
     }
 
+    public void setDay(String day) {
+        this.day = day;
+    }
+
     public String getTime() {
         return time;
+    }
+
+    public void setTime(String time) {
+        this.time = time;
     }
 
     public String getClassroom() {
