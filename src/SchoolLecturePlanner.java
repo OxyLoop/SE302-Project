@@ -34,17 +34,50 @@ public class SchoolLecturePlanner {
         students.addAll(studentMap.values());
     }
 
-    public boolean isClassroomAvailable(String classroomName, String day, String time) {
-        for (Course course : courses) {
-            
-            if (course.getClassroom().equals(classroomName) &&
-                course.getDay().equals(day) && 
-                course.getTime().equals(time)) {
-                return false; 
-              }
+    public boolean isClassroomAvailable(String classroomName, String day, String startTime, int durationHours) {
+       
+        String[] times = {
+            "08:30", "09:25", "10:20", "11:15", "12:10", "13:05", "14:00", "14:55",
+            "15:50", "16:45", "17:40", "18:35", "19:30", "20:25", "21:20", "22:15"
+        };
+    
+        
+        int startIndex = findTimeIndex(times, startTime);
+        if (startIndex == -1) {
+            System.out.println("Invalid start time.");
+            return false; 
         }
+    
+        
+        int endIndex = startIndex + durationHours - 1;
+        if (endIndex >= times.length) {
+            System.out.println("Duration exceeds available lecture slots.");
+            return false; 
+        }
+    
+        for (Course course : courses) {
+            if (course.getClassroom().equals(classroomName) && course.getDay().equals(day)) {
+                int courseStartIndex = findTimeIndex(times, course.getTime());
+                int courseEndIndex = courseStartIndex + course.getDurationHours() - 1;
+    
+                if ((startIndex <= courseEndIndex) && (endIndex >= courseStartIndex)) {
+                    return false; 
+                }
+            }
+        }
+    
         return true; 
     }
+    
+    private int findTimeIndex(String[] times, String time) {
+        for (int i = 0; i < times.length; i++) {
+            if (times[i].equals(time)) {
+                return i; 
+            }
+        }
+        return -1; 
+    }
+    
     
     public List<Course> searchCourses(String searchText) {
         List<Course> matchingCourses = new ArrayList<>();
@@ -114,7 +147,7 @@ public class SchoolLecturePlanner {
             String time = timingParts[1];
         
             
-            if (!isClassroomAvailable(classroomName, day, time)) {
+            if (!isClassroomAvailable(classroomName, day, time, durationHours)) {
                 System.out.println("Scheduling conflict detected! Another course is already scheduled in this classroom at this time.");
                 return;
             }
