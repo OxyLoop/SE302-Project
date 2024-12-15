@@ -15,7 +15,7 @@ import javafx.stage.Stage;
 //asdasdasdasd
 public class mainApp extends Application {
     
-    private SchoolLecturePlanner planner = new SchoolLecturePlanner(); // Declare planner globally
+    private SchoolLecturePlanner planner = new SchoolLecturePlanner(); 
 
     @Override
     //MAIN TAB FOR APPLICATION
@@ -115,30 +115,35 @@ public class mainApp extends Application {
         Stage newWindow = new Stage();
         VBox vbox = new VBox(10);
         vbox.setStyle("-fx-alignment: center; -fx-padding: 20;");
-
+    
         Label title = new Label("Add Course");
         title.setStyle("-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #001f3f;");
-
-        Label nameLabel = new Label("Name:");
-        nameLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #001f3f;");
-        TextField nameField = new TextField();
-        nameField.setPromptText("");
-
+    
         Label codeLabel = new Label("Code:");
         codeLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #001f3f;");
         TextField codeField = new TextField();
-        codeField.setPromptText("");
-
-        Label timingLabel = new Label("Timing:");
-        timingLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #001f3f;");
-        TextField timingField = new TextField();
-        timingField.setPromptText("");
-
+        codeField.setPromptText("Enter course code");
+    
         Label lecturerLabel = new Label("Lecturer:");
         lecturerLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #001f3f;");
         TextField lecturerField = new TextField();
-        lecturerField.setPromptText("");
-
+        lecturerField.setPromptText("Enter lecturer name");
+    
+        Label timingLabel = new Label("Timing:");
+        timingLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #001f3f;");
+        TextField timingField = new TextField();
+        timingField.setPromptText("Enter day ,space and time in _:_ format , e.g Monday 10:00)");
+    
+        Label durationLabel = new Label("Duration:");
+        durationLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #001f3f;");
+        TextField durationField = new TextField();
+        durationField.setPromptText("Enter duration in hours");
+    
+        Label classroomLabel = new Label("Classroom Name:");
+        classroomLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #001f3f;");
+        TextField classroomField = new TextField();
+        classroomField.setPromptText("Enter classroom name");
+    
         Button addButton = new Button("Add");
         addButton.setStyle(
             "-fx-font-size: 14px;" +
@@ -148,22 +153,53 @@ public class mainApp extends Application {
             "-fx-background-radius: 10;" +
             "-fx-padding: 5 20;"
         );
-        addButton.setOnAction(event -> newWindow.close());
-
+        addButton.setOnAction(event -> {
+            String code = codeField.getText().trim();
+            String lecturer = lecturerField.getText().trim();
+            String timing = timingField.getText().trim();
+            String duration = durationField.getText().trim();
+            String classroomName = classroomField.getText().trim();
+    
+        
+            if (!code.isEmpty() && !lecturer.isEmpty() && !timing.isEmpty() && !duration.isEmpty() && !classroomName.isEmpty()) {
+                try {
+                    int durationHours = Integer.parseInt(duration);
+    
+                    
+                    planner.addCourse(code, lecturer, timing, durationHours, classroomName);
+    
+                    
+                    CSVLoader loader = new CSVLoader();
+                    loader.writeCourseToFile(new Course(code, lecturer, timing, durationHours, classroomName), "data/Courses.csv");
+    
+                    
+                    newWindow.close();
+                } catch (NumberFormatException e) {
+                    System.out.println("Duration must be a valid number!");
+                }
+            } else {
+                System.out.println("All fields are required!");
+            }
+        });
+    
         vbox.getChildren().addAll(
             title,
-            nameLabel, nameField,
             codeLabel, codeField,
-            timingLabel, timingField,
             lecturerLabel, lecturerField,
+            timingLabel, timingField,
+            durationLabel, durationField,
+            classroomLabel, classroomField,
             addButton
         );
-
-        Scene newScene = new Scene(vbox, 300, 400);
+    
+        Scene newScene = new Scene(vbox, 300, 500);
         newWindow.setTitle("Add New Course Tab");
         newWindow.setScene(newScene);
         newWindow.show();
     }
+    
+
+
     public static void main (String[]args){
         launch(args);
         //SchoolLecturePlanner planner = new SchoolLecturePlanner();

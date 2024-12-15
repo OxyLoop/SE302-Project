@@ -91,33 +91,45 @@ public class SchoolLecturePlanner {
     
 
 
-    public void addCourse(String name, String code, String lecturer, String timing, String classroomName) {
-        Classroom classroom = findClassroomByName(classroomName);
-        if (classroom == null) {
-            System.out.println("Classroom does not exist!");
-            return;
+        public void addCourse(String code, String lecturer, String timing, int durationHours, String classroomName) {
+            Classroom classroom = findClassroomByName(classroomName);
+            if (classroom == null) {
+                System.out.println("Classroom does not exist!");
+                return;
+            }
+        
+            
+            if (durationHours <= 0) {
+                System.out.println("Invalid duration! Duration must be a positive number of hours.");
+                return;
+            }
+        
+            
+            String[] timingParts = timing.split(" ");
+            if (timingParts.length != 2) {
+                System.out.println("Invalid timing format! It should be 'Day Time'.");
+                return;
+            }
+            String day = timingParts[0];
+            String time = timingParts[1];
+        
+            
+            if (!isClassroomAvailable(classroomName, day, time)) {
+                System.out.println("Scheduling conflict detected! Another course is already scheduled in this classroom at this time.");
+                return;
+            }
+        
+           
+            Course course = new Course(code, lecturer, timing, durationHours, classroomName);
+            courses.add(course); 
+            classroom.setAvailable(false); 
+            courseMap.put(code, course); 
+        
+            System.out.println("Course added: " + course);
+            
         }
-        String[] timingParts = timing.split(" ");
-    if (timingParts.length != 2) {
-        System.out.println("Invalid timing format! It should be 'Day Time'.");
-        return;
-    }
-    String day = timingParts[0];
-    String time = timingParts[1];
-
-        if (!isClassroomAvailable(classroomName, day, time)) {
-            System.out.println("Scheduling conflict detected! Another course is already scheduled in this classroom at this time.");
-            return;
-        }
+        
     
-        Course course = new Course(code, lecturer, timing, classroomName);
-        courses.add(course);
-        classroom.setAvailable(false); 
-        courseMap.put(code, course); 
-        System.out.println("Course added: " + course);
-    
-    
-    }
     
     public void removeCourse(String code) {
         Course courseToRemove = findCourseByCode(code);
@@ -155,6 +167,7 @@ public class SchoolLecturePlanner {
         Course course = findCourseByCode(courseCode);
         if (student != null && course != null) {
             student.addCourse(course);
+            course.addStudent(student);
             System.out.println("Student enrolled: " + student.getName() + " ---> " + course.getCode());
         } else {
             System.out.println("Student or Course not found!");

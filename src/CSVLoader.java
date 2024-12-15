@@ -1,5 +1,6 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +31,7 @@ public class CSVLoader {
                 if (!data[0].equals("Course")) { // Skip header
                     String code = data[0];
                     String timing = data[1];
+                    int durationHours = Integer.parseInt(data[2]);
                     String lecturer = data[3];
                     String[] studentNames = extractStudentNames(data);
                     String classroomName = findAvailableClassroom(classrooms);
@@ -37,7 +39,7 @@ public class CSVLoader {
                         System.out.println("No available classroom for course: " + code);
                         continue;
                     }
-                    Course course = new Course( code, lecturer, timing, classroomName);
+                    Course course = new Course(code, lecturer, timing, durationHours, classroomName );
                     courses.add(course);
                     courseMap.put(code, course);
                     assignCourseToClassroom(classroomName, classrooms, course);
@@ -92,4 +94,33 @@ public class CSVLoader {
             }
         }
     }
+
+
+    public void writeCourseToFile(Course course, String filename) {
+        try (FileWriter writer = new FileWriter(filename, true)) {
+            StringBuilder sb = new StringBuilder();
+            
+            String timing = course.getDay() + " " + course.getTime();
+            
+            sb.append(course.getCode()).append(";")
+              .append(timing).append(";")  
+              .append(course.getDurationHours()).append(";")
+              .append(course.getLecturer()).append(";");
+    
+            
+            List<Student> students = course.getEnrolledStudents(); 
+            for (Student student : students) {
+                sb.append(student.getName()).append(";");
+            }
+    
+            
+            writer.append(sb.toString()).append("\n");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    
+
+
 }

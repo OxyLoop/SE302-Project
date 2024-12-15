@@ -12,6 +12,7 @@ public class ListingTab {
 
     private SchoolLecturePlanner planner;
     private String type; // "students", "lectures", or "classrooms"
+    
 
     public ListingTab(SchoolLecturePlanner planner, String type) {
         this.planner = planner;
@@ -71,6 +72,7 @@ public class ListingTab {
             default: return "Listing";
         }
     }
+    
 
     private List<String> fetchData() {
         switch (type) {
