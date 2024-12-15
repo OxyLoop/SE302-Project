@@ -12,11 +12,12 @@ public class ListingTab {
 
     private SchoolLecturePlanner planner;
     private String type; // "students", "lectures", or "classrooms"
-    
+    private VBox courseListContainer;
 
     public ListingTab(SchoolLecturePlanner planner, String type) {
         this.planner = planner;
         this.type = type;
+        this.courseListContainer = new VBox();
     }
 
     public void show() {
@@ -152,5 +153,23 @@ public class ListingTab {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+
+    public void refreshCourseList() {
+        courseListContainer.getChildren().clear();
+
+        List<Course> courses = planner.getCourses();
+
+        for (Course course : courses) {
+            Label courseLabel = new Label(course.getCode() + " - " + course.getLecturer());
+            courseListContainer.getChildren().add(courseLabel);
+        }
+
+        Scene scene = new Scene(courseListContainer, 300, 500);
+        Stage stage = new Stage();
+        stage.setScene(scene);
+        stage.setTitle("Course List");
+        stage.show();
     }
 }

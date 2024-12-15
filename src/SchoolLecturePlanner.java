@@ -240,9 +240,16 @@ public class SchoolLecturePlanner {
     public List<Classroom> getClassrooms() {
     return classrooms; 
     }
+    public List<String> getClassroomNames() {
+        List<String> classroomNames = new ArrayList<>();
+        for (Classroom classroom : classrooms) {
+            classroomNames.add(classroom.getName()); 
+        }
+        return classroomNames;
+    }
 
-    public void addClassroom(int id, String name, int capacity) {
-        Classroom classroom = new Classroom(id, name, capacity, true);
+    public void addClassroom(String name, int capacity) {
+        Classroom classroom = new Classroom(name, capacity);
         classrooms.add(classroom);
         System.out.println("Classroom added: " + classroom);
     }

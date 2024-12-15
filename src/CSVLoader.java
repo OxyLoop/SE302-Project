@@ -15,7 +15,7 @@ public class CSVLoader {
                 if (!data[0].equals("Classroom")) { // Skip header
                     String name = data[0];
                     int capacity = Integer.parseInt(data[1]);
-                    classrooms.add(new Classroom(classrooms.size() + 1, name, capacity, true));
+                    classrooms.add(new Classroom(name, capacity));
                 }
             }
         } catch (IOException e) {
@@ -120,7 +120,20 @@ public class CSVLoader {
         }
     }
     
-    
+    public void writeClassroomToFile(Classroom classroom, String filename) {
+        try (FileWriter writer = new FileWriter(filename, true)) {
+            StringBuilder sb = new StringBuilder();
+            
+            
+            sb.append(classroom.getName()).append(";")
+              .append(classroom.getCapacity()).append(";\n");
+            
+            
+            writer.append(sb.toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
 
 }

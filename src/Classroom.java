@@ -1,27 +1,18 @@
 public class Classroom {
-    private int id;
+    
     private String name;
     private int capacity;
     private boolean isAvailable;
     private Course assignedCourse;
 
 
-    public Classroom(int id, String name, int capacity, boolean isAvailable) {
-        this.id = id;
+    public Classroom(String name, int capacity) {
         this.name = name;
         this.capacity = capacity;
-        this.isAvailable = isAvailable;
+        this.isAvailable = true; 
         this.assignedCourse = null;
     }
 
-    // Getters and Setters
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
 
     public String getName() {
         return name;
