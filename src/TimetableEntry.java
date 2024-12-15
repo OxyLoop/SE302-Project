@@ -38,11 +38,20 @@ public class TimetableEntry extends Application {
     
     
     @Override
-    public void start(Stage tableStage) {
+public void start(Stage tableStage) {
     GridPane gridPane = new GridPane();
-    gridPane.setGridLinesVisible(true); 
-
+    gridPane.setGridLinesVisible(true);
     
+    for (Course course : filteredCourses) {
+        int col = getColumnForDay(course.getDay());
+        int startRow = getRowForTime(course.getTime());
+        int duration = course.getDurationHours(); // Duration in hours (provided directly by the course)
+        
+        addClassToGrid(gridPane, course.getCode(), col, startRow, duration);
+    }
+    
+
+    // Days of the week
     String[] days = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
     for (int col = 1; col <= days.length; col++) {
         Label dayLabel = new Label(days[col - 1]);
@@ -50,7 +59,7 @@ public class TimetableEntry extends Application {
         gridPane.add(dayLabel, col, 0);
     }
 
-    
+    // Time slots
     String[] times = {
         "08:30", "09:25", "10:20", "11:15", "12:10", "13:05", "14:00", "14:55",
         "15:50", "16:45", "17:40", "18:35", "19:30", "20:25", "21:20", "22:15"
@@ -61,7 +70,7 @@ public class TimetableEntry extends Application {
         gridPane.add(timeLabel, 0, row);
     }
 
-    
+    // Empty grid cells
     for (int col = 0; col <= days.length; col++) {
         for (int row = 0; row <= times.length; row++) {
             StackPane cell = new StackPane();
@@ -69,18 +78,18 @@ public class TimetableEntry extends Application {
             gridPane.add(cell, col, row);
         }
     }
+
+    // Add courses to the grid
     for (Course course : filteredCourses) {
-        
-        addClassToGrid(gridPane, course.getCode(), getColumnForDay(course.getDay()), getRowForTime(course.getTime()), 1);
+        int col = getColumnForDay(course.getDay());
+        int startRow = getRowForTime(course.getTime());
+        int duration = course.getDurationHours(); // Duration in hours
+
+        // Add the course to the grid
+        addClassToGrid(gridPane, course.getCode(), col, startRow, duration);
     }
 
-    // Gpt yazdığı test cases
-   /* addClassToGrid(gridPane, "CE 323", 2, 1, 1); // Salı 08:30-10:20
-    addClassToGrid(gridPane, "EEE 242", 2, 5, 1); // Salı 12:10-13:05
-    addClassToGrid(gridPane, "CE 315", 4, 1, 1); // Perşembe 08:30-09:25
-    addClassToGrid(gridPane, "MATH 250", 5, 4, 1); // Cuma 11:15-13:05
-    addClassToGrid(gridPane, "SE 302", 5, 8, 1); // Cuma 14:00-16:45*/ 
-
+    // Grid styling
     gridPane.setHgap(1);
     gridPane.setVgap(1);
     gridPane.setStyle("-fx-border-color: black; -fx-padding: 10; -fx-background-color: white;");
@@ -92,20 +101,27 @@ public class TimetableEntry extends Application {
 }
 
 
-    private void addClassToGrid(GridPane gridPane, String className, int col, int row, int rowSpan) {
-        Button classButton = new Button(className);
-        classButton.setStyle("-fx-border-color: black; -fx-padding: 10; -fx-background-color: lightblue; -fx-alignment: center;");
-        classButton.setOnMouseEntered(event -> classButton.setStyle("-fx-border-color: black; -fx-padding: 10; -fx-background-color: lightgreen;"));
-        classButton.setOnMouseExited(event -> classButton.setStyle("-fx-border-color: black; -fx-padding: 10; -fx-background-color: lightblue;"));
 
-        
-        classButton.setOnAction(event -> {
+private void addClassToGrid(GridPane gridPane, String className, int col, int startRow, int duration) {
+    startRow++;
+    for (int i = 0; i < duration; i++) {
+        Button hourButton = new Button(className + " (" + (i + 1) + "h)");
+        hourButton.setStyle("-fx-border-color: black; -fx-padding: 10; -fx-background-color: lightblue; -fx-alignment: center;");
+
+        hourButton.setOnMouseEntered(event -> hourButton.setStyle("-fx-border-color: black; -fx-padding: 10; -fx-background-color: lightgreen;"));
+        hourButton.setOnMouseExited(event -> hourButton.setStyle("-fx-border-color: black; -fx-padding: 10; -fx-background-color: lightblue;"));
+
+        hourButton.setOnAction(event -> {
             System.out.println("Button clicked for: " + className);
             testTab();
         });
-        
-        gridPane.add(classButton, col, row+1, 1, rowSpan);
+
+        // Add the button for each hour in the correct row
+        gridPane.add(hourButton, col, startRow + i, 1, 1);
     }
+}
+
+
 
     private void testTab() {
         Stage newWindow = new Stage();
