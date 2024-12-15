@@ -190,8 +190,6 @@ public class mainApp extends Application {
                     CSVLoader loader = new CSVLoader();
                     loader.writeCourseToFile(new Course(code, lecturer, timing, durationHours, classroomName), "data/Courses.csv");
     
-                    ListingTab listingTab = new ListingTab(planner, "Lectures");
-                    listingTab.refreshCourseList();
     
                     newWindow.close();
                 } catch (NumberFormatException e) {
