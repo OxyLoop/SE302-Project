@@ -1,6 +1,12 @@
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
-
+import javafx.stage.FileChooser;
+import java.io.File;
 import javafx.application.Application;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -19,6 +25,89 @@ public class mainApp extends Application {
     
     private SchoolLecturePlanner planner = new SchoolLecturePlanner(); 
 
+
+     private List<Course> importCSV(String filePath) {
+        List<Course> importedCourses = new ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                
+                String[] courseData = line.split(";");
+                
+               
+                if (courseData.length >= 5) {
+                    String courseCode = courseData[0];
+                    String timing = courseData[1]; 
+                    int durationHours = Integer.parseInt(courseData[2]); 
+                    String lecturer = courseData[3];  
+                    
+                    
+                    List<Student> students = new ArrayList<>();
+                    for (int i = 4; i < courseData.length; i++) {
+                        if (!courseData[i].isEmpty()) {
+                            students.add(new Student(courseData[i])); 
+                        }
+                    }
+                    
+                    
+                    Course course = new Course(courseCode, lecturer, timing, durationHours, ""); 
+                    for (Student student : students) {
+                        course.addStudent(student);  
+                    }
+                    
+                    importedCourses.add(course);
+                } else {
+                    System.out.println("Invalid CSV line: " + line); 
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return importedCourses;
+    }
+
+    
+    private void exportCSV(String filePath, List<Course> courses) {
+        try (FileWriter writer = new FileWriter(filePath)) {
+            for (Course course : courses) {
+                writer.write(course.toCsvString());
+                writer.write("\n");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    private void importCSVButton() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV Files", "*.csv"));
+        File file = fileChooser.showOpenDialog(null);
+        if (file != null) {
+            List<Course> importedCourses = importCSV(file.getAbsolutePath());
+            
+            for (Course course : importedCourses) {
+                String code = course.getCode();
+                String lecturer = course.getLecturer();
+                String timing = course.getDay() + " " + course.getTime();  // Combine day and time
+                int durationHours = course.getDurationHours();
+                String classroomName = course.getClassroom();
+                
+                planner.addCourse(code, lecturer, timing, durationHours, classroomName);
+            }
+            System.out.println("Courses imported from CSV.");
+        }
+    }
+    
+    
+    
+    private void exportCSVButton() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV Files", "*.csv"));
+        File file = fileChooser.showSaveDialog(null);
+        if (file != null) {
+            exportCSV(file.getAbsolutePath(), planner.getCourses());  
+            System.out.println("Courses exported to CSV.");
+        }
+    }
     @Override
     //MAIN TAB FOR APPLICATION
     public void start(Stage primaryStage) {
@@ -52,10 +141,36 @@ public class mainApp extends Application {
         addClassButton.setOnAction(event -> openAddClassWindow());
         
 
-        HBox topButtonBox = new HBox(20); 
-        topButtonBox.setAlignment(Pos.CENTER);
-        topButtonBox.getChildren().addAll(addCourseButton, addClassButton);
-        root.setTop(topButtonBox);  
+        Button importButton = new Button("Import Courses");
+    importButton.setStyle(
+        "-fx-font-size: 14px;" +
+        "-fx-background-color: white;" +
+        "-fx-text-fill: #001f3f;" +
+        "-fx-border-radius: 10;" +
+        "-fx-background-radius: 10;" +
+        "-fx-padding: 5 20;"
+    );
+    importButton.setOnAction(event -> importCSVButton());
+
+    // Create Export Button
+    Button exportButton = new Button("Export Courses");
+    exportButton.setStyle(
+        "-fx-font-size: 14px;" +
+        "-fx-background-color: white;" +
+        "-fx-text-fill: #001f3f;" +
+        "-fx-border-radius: 10;" +
+        "-fx-background-radius: 10;" +
+        "-fx-padding: 5 20;"
+    );
+    exportButton.setOnAction(event -> exportCSVButton());
+
+    
+    HBox topButtonBox = new HBox(20); 
+    topButtonBox.setAlignment(Pos.CENTER);
+    topButtonBox.getChildren().addAll(addCourseButton, addClassButton, importButton, exportButton);
+    root.setTop(topButtonBox);
+
+
 
         VBox vbox = new VBox(20);
         vbox.setStyle("-fx-alignment: center;");
@@ -67,6 +182,11 @@ public class mainApp extends Application {
             "-fx-text-fill: #ffffff;" +
             "-fx-padding: 10;"
         );
+
+
+        
+
+
         
         //Students button
         Button studentButton = new Button("Students");

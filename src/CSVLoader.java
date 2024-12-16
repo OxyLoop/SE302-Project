@@ -1,7 +1,11 @@
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -70,7 +74,7 @@ public class CSVLoader {
         if (studentMap.containsKey(studentName)) {
             return studentMap.get(studentName);
         } else {
-            Student newStudent = new Student(studentMap.size() + 1, studentName);
+            Student newStudent = new Student(studentName);
             studentMap.put(studentName, newStudent);
             return newStudent;
         }
@@ -119,6 +123,30 @@ public class CSVLoader {
             e.printStackTrace();
         }
     }
+
+    /*public void rewriteCoursesToFile(List<Course> courses, Course editedCourse, File courseFile) {
+        
+        for (int i = 0; i < courses.size(); i++) {
+            if (courses.get(i).getCode().equals(editedCourse.getCode())) {
+                courses.set(i, editedCourse);  
+                break;
+            }
+        }
+    
+        
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(courseFile))) {
+            for (Course c : courses) {
+                writer.write(c.toCsvString());  
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }*/ // hatalı tüm dosyayı silip tek editleneni yazıyor, çözemedim
+    
+
+
+    
     
     public void writeClassroomToFile(Classroom classroom, String filename) {
         try (FileWriter writer = new FileWriter(filename, true)) {

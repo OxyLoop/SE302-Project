@@ -1,3 +1,5 @@
+import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -20,6 +22,8 @@ public class TimetableEntry extends Application {
     private SchoolLecturePlanner planner;
     private GridPane gridPane;
     private Stage tableStage;
+    private CSVLoader csvLoader;
+    private String courseFile;
 
     public TimetableEntry() {}
 
@@ -31,9 +35,11 @@ public class TimetableEntry extends Application {
         this.time = time;
     }
 
-    public TimetableEntry(List<Course> filteredCourses, SchoolLecturePlanner planner) {
+    public TimetableEntry(List<Course> filteredCourses, SchoolLecturePlanner planner, CSVLoader csvLoader, String courseFile) {
         this.filteredCourses = filteredCourses;
         this.planner = planner;
+        this.csvLoader = csvLoader;
+        this.courseFile = courseFile;
     }
 
     @Override

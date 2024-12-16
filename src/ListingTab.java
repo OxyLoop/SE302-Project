@@ -13,6 +13,9 @@ public class ListingTab {
     private SchoolLecturePlanner planner;
     private String type; // "students", "lectures", or "classrooms"
     private VBox courseListContainer;
+    CSVLoader csvLoader = new CSVLoader(); 
+    String courseFile = "data/Courses.csv"; // bunu getPath yapıp değiştirmek lazım
+
 
     public ListingTab(SchoolLecturePlanner planner, String type) {
         this.planner = planner;
@@ -52,7 +55,7 @@ public class ListingTab {
         listView.setOnMouseClicked(event -> {
             String selectedItem = listView.getSelectionModel().getSelectedItem();
             if (selectedItem != null && !selectedItem.equals("No items found")) {
-                handleItemClick(selectedItem);
+                handleItemClick(selectedItem, csvLoader, courseFile); 
             }
         });
 
@@ -96,34 +99,34 @@ public class ListingTab {
         }
     }
 
-    private void handleItemClick(String selectedItem) {
+    private void handleItemClick(String selectedItem, CSVLoader csvLoader, String courseFile) {
         switch (type) {
             case "students":
                 Student student = planner.findStudentByName(selectedItem);
                 if (student != null) {
-                    showStudentTimetable(student);
+                    showStudentTimetable(student, csvLoader, courseFile);
                 }
                 break;
             case "lectures":
-                String lectureCode = selectedItem.split(" - ")[0]; 
+                String lectureCode = selectedItem.split(" - ")[0];
                 Course course = planner.findCourseByCode(lectureCode);
                 if (course != null) {
-                    showLectureTimetable(course);
+                    showLectureTimetable(course, csvLoader, courseFile);
                 }
                 break;
             case "classrooms":
-                String classroomName = selectedItem.split(" \\(Capacity:")[0]; 
+                String classroomName = selectedItem.split(" \\(Capacity:")[0];
                 Classroom classroom = planner.findClassroomByName(classroomName);
                 if (classroom != null) {
-                    showClassroomTimetable(classroom);
+                    showClassroomTimetable(classroom, csvLoader, courseFile);
                 }
                 break;
         }
     }
 
-    private void showStudentTimetable(Student student) {
+    private void showStudentTimetable(Student student, CSVLoader csvLoader, String courseFile) {
         List<Course> courses = student.getEnrolledCourses();
-        TimetableEntry timetableEntry = new TimetableEntry(courses, planner);
+        TimetableEntry timetableEntry = new TimetableEntry(courses, planner, csvLoader, courseFile);
         Stage timetableStage = new Stage();
         try {
             timetableEntry.start(timetableStage);
@@ -131,9 +134,9 @@ public class ListingTab {
             e.printStackTrace();
         }
     }
-
-    private void showLectureTimetable(Course course) {
-        TimetableEntry timetableEntry = new TimetableEntry(List.of(course), planner);
+    
+    private void showLectureTimetable(Course course, CSVLoader csvLoader, String courseFile) {
+        TimetableEntry timetableEntry = new TimetableEntry(List.of(course), planner, csvLoader, courseFile);
         Stage timetableStage = new Stage();
         try {
             timetableEntry.start(timetableStage);
@@ -141,12 +144,12 @@ public class ListingTab {
             e.printStackTrace();
         }
     }
-
-    private void showClassroomTimetable(Classroom classroom) {
+    
+    private void showClassroomTimetable(Classroom classroom, CSVLoader csvLoader, String courseFile) {
         List<Course> courses = planner.getCourses().stream()
                 .filter(course -> course.getClassroom() != null && course.getClassroom().equals(classroom.getName()))
                 .collect(Collectors.toList());
-        TimetableEntry timetableEntry = new TimetableEntry(courses, planner);
+        TimetableEntry timetableEntry = new TimetableEntry(courses, planner, csvLoader, courseFile);
         Stage timetableStage = new Stage();
         try {
             timetableEntry.start(timetableStage);

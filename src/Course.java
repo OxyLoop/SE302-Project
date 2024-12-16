@@ -19,6 +19,22 @@ public class Course {
         this.enrolledStudents = new ArrayList<>(); 
     }
 
+    
+    public String toCsvString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(code).append(";")
+          .append(day).append(" ").append(time).append(";")
+          .append(durationHours).append(";")
+          .append(lecturer).append(";");
+        
+        // Append enrolled students
+        for (Student student : enrolledStudents) {
+            sb.append(student.getName()).append(";");
+        }
+        
+        return sb.toString();
+    }
+    
     public void addStudent(Student student) {
         enrolledStudents.add(student);
     }

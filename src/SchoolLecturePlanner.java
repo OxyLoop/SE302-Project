@@ -189,13 +189,13 @@ public class SchoolLecturePlanner {
         return null;
     }
 
-    public void addStudent(int id, String name) {
-        Student student = new Student(id, name);
+    public void addStudent(String name) {
+        Student student = new Student(name);
         students.add(student);
         System.out.println("Student added: " + student);
     }
 
-    public void enrollStudentToCourse(int studentId, String courseCode) {
+    /*public void enrollStudentToCourse(int studentId, String courseCode) {
         Student student = findStudentById(studentId);
         Course course = findCourseByCode(courseCode);
         if (student != null && course != null) {
@@ -205,16 +205,8 @@ public class SchoolLecturePlanner {
         } else {
             System.out.println("Student or Course not found!");
         }
-    }
+    }*/
 
-    public Student findStudentById(int id) {
-        for (Student student : students) {
-            if (student.getId() == id) {
-                return student;
-            }
-        }
-        return null;
-    }
 
     public List<String> getAllStudentNames() {
         List<String> studentNames = new ArrayList<>();
