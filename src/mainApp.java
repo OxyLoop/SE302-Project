@@ -12,11 +12,17 @@ import java.io.File;
 import javafx.application.Application;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -120,6 +126,38 @@ public class mainApp extends Application {
         BorderPane root = new BorderPane();
         root.setStyle("-fx-background-color: #001f3f; -fx-padding: 20;");
 
+        MenuBar menuBar = new MenuBar();
+        menuBar.setStyle("-fx-background-color: linear-gradient(to top right, #6fa8dc, #ffffff); ");
+        Menu fileMenu = new Menu("File");
+
+        MenuItem importMenuItem = new MenuItem("Import");
+        importMenuItem.setOnAction(event -> importCSVButton());
+
+        MenuItem exportMenuItem = new MenuItem("Export Books");
+        exportMenuItem.setOnAction(event -> exportCSVButton());
+
+        SeparatorMenuItem separatorMenuItem = new SeparatorMenuItem();
+
+        fileMenu.getItems().addAll(importMenuItem,exportMenuItem);
+
+        Menu helpMenu = new Menu("Help");
+        MenuItem aboutMenuItem = new MenuItem("About PagePal");
+        aboutMenuItem.setOnAction(e -> {
+            Alert alert = new Alert(AlertType.INFORMATION);
+            alert.setHeaderText("About PagePal");
+            alert.setContentText(
+                    "This application is made by ..... It is the project of the course SE302.");
+            alert.setTitle("About");
+            alert.showAndWait();
+        });
+        MenuItem manualMenuItem = new MenuItem("Manual");
+        helpMenu.getItems().addAll(aboutMenuItem, manualMenuItem);
+
+        menuBar.getMenus().addAll(fileMenu, helpMenu);
+
+
+
+
         Button addCourseButton = new Button("Add Course");
         addCourseButton.setStyle(
             "-fx-font-size: 14px;" +
@@ -142,36 +180,13 @@ public class mainApp extends Application {
             "-fx-padding: 5 20;"
         );
         addClassButton.setOnAction(event -> openAddClassWindow());
-        
-
-        Button importButton = new Button("Import Courses");
-    importButton.setStyle(
-        "-fx-font-size: 14px;" +
-        "-fx-background-color: white;" +
-        "-fx-text-fill: #001f3f;" +
-        "-fx-border-radius: 10;" +
-        "-fx-background-radius: 10;" +
-        "-fx-padding: 5 20;"
-    );
-    importButton.setOnAction(event -> importCSVButton());
-
-    // Create Export Button
-    Button exportButton = new Button("Export Courses");
-    exportButton.setStyle(
-        "-fx-font-size: 14px;" +
-        "-fx-background-color: white;" +
-        "-fx-text-fill: #001f3f;" +
-        "-fx-border-radius: 10;" +
-        "-fx-background-radius: 10;" +
-        "-fx-padding: 5 20;"
-    );
-    exportButton.setOnAction(event -> exportCSVButton());
 
     
-    HBox topButtonBox = new HBox(20); 
-    topButtonBox.setAlignment(Pos.CENTER);
-    topButtonBox.getChildren().addAll(addCourseButton, addClassButton, importButton, exportButton);
-    root.setTop(topButtonBox);
+        HBox topButtonBox = new HBox(20); 
+        topButtonBox.setAlignment(Pos.CENTER);
+        topButtonBox.getChildren().addAll(addCourseButton, addClassButton);
+        VBox topContainer = new VBox(menuBar,topButtonBox);
+        root.setTop(topContainer);
 
 
 
