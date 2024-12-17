@@ -123,7 +123,7 @@ public class SchoolLecturePlanner {
         */
     
 
-
+    
         public void addCourse(String code, String lecturer, String timing, int durationHours, String classroomName) {
             Classroom classroom = findClassroomByName(classroomName);
             if (classroom == null) {
@@ -161,8 +161,7 @@ public class SchoolLecturePlanner {
             System.out.println("Course added: " + course);
             
         }
-        
-    
+         
     
     public void removeCourse(String code) {
         Course courseToRemove = findCourseByCode(code);
