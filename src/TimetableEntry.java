@@ -81,7 +81,8 @@ public class TimetableEntry extends Application {
             timeLabel.setStyle("-fx-font-weight: bold; -fx-alignment: center;");
             grid.add(timeLabel, 0, row);
         }
-
+        //Timetableda boş olan yere ders ordan değil de asıl panelden ekleyelim - Arda
+        /* 
         for (int row = 1; row <= times.length; row++) {
             for (int col = 1; col <= days.length; col++) {
                 Button emptyButton = new Button("");
@@ -92,6 +93,7 @@ public class TimetableEntry extends Application {
                 grid.add(emptyButton, col, row);
             }
         }
+            */
 
         for (Course course : filteredCourses) {
             int col = getColumnForDay(course.getDay());
@@ -118,31 +120,58 @@ public class TimetableEntry extends Application {
     }
 
     private void openEditTab(Course course) {
-        Stage editStage = new Stage();
-
+        Stage detailStage = new Stage();
+    
         VBox vbox = new VBox(10);
         vbox.setStyle("-fx-alignment: center; -fx-padding: 20;");
-
+    
+        Label detailLabel = new Label("Course Details");
+        detailLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+    
+        Label codeLabel = new Label("Course Code: " + course.getCode());
+        Label lecturerLabel = new Label("Lecturer: " + course.getLecturer());
+        Label dayLabel = new Label("Day: " + course.getDay());
+        Label timeLabel = new Label("Time: " + course.getTime());
+        Label durationLabel = new Label("Duration: " + course.getDurationHours() + " hour(s)");
+    
+        Button editButton = new Button("Edit");
+        editButton.setStyle("-fx-font-size: 14px; -fx-padding: 5 10;");
+        editButton.setOnAction(event -> openEditForm(course, detailStage));
+    
+        vbox.getChildren().addAll(detailLabel, codeLabel, lecturerLabel, dayLabel, timeLabel, durationLabel, editButton);
+    
+        Scene detailScene = new Scene(vbox, 300, 250);
+        detailStage.setScene(detailScene);
+        detailStage.setTitle("Course Details");
+        detailStage.show();
+    }
+    
+    private void openEditForm(Course course, Stage parentStage) {
+        Stage editStage = new Stage();
+    
+        VBox vbox = new VBox(10);
+        vbox.setStyle("-fx-alignment: center; -fx-padding: 20;");
+    
         Label editLabel = new Label("Edit Course Details");
         editLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
-
+    
         ChoiceBox<String> dayChoice = new ChoiceBox<>();
         dayChoice.getItems().addAll("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday");
         dayChoice.setValue(course.getDay());
-
+    
         ChoiceBox<String> timeChoice = new ChoiceBox<>();
         timeChoice.getItems().addAll(
             "08:30", "09:25", "10:20", "11:15", "12:10", "13:05", "14:00", "14:55",
             "15:50", "16:45", "17:40", "18:35", "19:30", "20:25", "21:20", "22:15"
         );
         timeChoice.setValue(course.getTime());
-
+    
         ChoiceBox<String> durationChoice = new ChoiceBox<>();
-        for (int i = 1; i <= 4; i++) {
+        for (int i = 1; i <= 6; i++) {
             durationChoice.getItems().add(i + " hour(s)");
         }
         durationChoice.setValue(course.getDurationHours() + " hour(s)");
-
+    
         Button saveButton = new Button("Save Changes");
         saveButton.setStyle("-fx-font-size: 14px; -fx-padding: 5 10;");
         saveButton.setOnAction(event -> {
@@ -150,16 +179,18 @@ public class TimetableEntry extends Application {
             course.setTime(timeChoice.getValue());
             course.setDurationHours(Integer.parseInt(durationChoice.getValue().split(" ")[0]));
             editStage.close();
+            parentStage.close();
             updateTimetable();
         });
-
+    
         vbox.getChildren().addAll(editLabel, new Label("Day:"), dayChoice, new Label("Time:"), timeChoice, new Label("Duration:"), durationChoice, saveButton);
-
+    
         Scene editScene = new Scene(vbox, 300, 250);
         editStage.setScene(editScene);
         editStage.setTitle("Edit Course");
         editStage.show();
     }
+    
 
     private void updateTimetable() {
         gridPane.getChildren().removeIf(node -> node instanceof Button && node.getStyle().contains("lightblue"));
