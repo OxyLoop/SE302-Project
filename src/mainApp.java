@@ -124,7 +124,7 @@ public class mainApp extends Application {
         planner.loadCourses("data/Courses.csv");
         
         BorderPane root = new BorderPane();
-        root.setStyle("-fx-background-color: #001f3f; -fx-padding: 20;");
+        root.setStyle("-fx-background-color: #001f3f");
 
         MenuBar menuBar = new MenuBar();
         menuBar.setStyle("-fx-background-color: linear-gradient(to top right, #6fa8dc, #ffffff); ");
@@ -133,18 +133,17 @@ public class mainApp extends Application {
         MenuItem importMenuItem = new MenuItem("Import");
         importMenuItem.setOnAction(event -> importCSVButton());
 
-        MenuItem exportMenuItem = new MenuItem("Export Books");
+        MenuItem exportMenuItem = new MenuItem("Export");
         exportMenuItem.setOnAction(event -> exportCSVButton());
-
-        SeparatorMenuItem separatorMenuItem = new SeparatorMenuItem();
 
         fileMenu.getItems().addAll(importMenuItem,exportMenuItem);
 
         Menu helpMenu = new Menu("Help");
+
         MenuItem aboutMenuItem = new MenuItem("About PagePal");
         aboutMenuItem.setOnAction(e -> {
             Alert alert = new Alert(AlertType.INFORMATION);
-            alert.setHeaderText("About PagePal");
+            alert.setHeaderText("About");
             alert.setContentText(
                     "This application is made by ..... It is the project of the course SE302.");
             alert.setTitle("About");
@@ -153,38 +152,20 @@ public class mainApp extends Application {
         MenuItem manualMenuItem = new MenuItem("Manual");
         helpMenu.getItems().addAll(aboutMenuItem, manualMenuItem);
 
-        menuBar.getMenus().addAll(fileMenu, helpMenu);
+        Menu addMenu = new Menu("New");
 
+        MenuItem addCourseItem = new MenuItem("Add Course");
+        addCourseItem.setOnAction(event -> openAddCourseWindow());
 
+        MenuItem addClassItem = new MenuItem("Add Class");
+        addClassItem.setOnAction(event -> openAddClassWindow());
 
+        addMenu.getItems().addAll(addCourseItem,addClassItem);
 
-        Button addCourseButton = new Button("Add Course");
-        addCourseButton.setStyle(
-            "-fx-font-size: 14px;" +
-            "-fx-background-color: white;" +
-            "-fx-text-fill: #001f3f;" +
-            "-fx-border-radius: 10;" +
-            "-fx-background-radius: 10;" +
-            "-fx-padding: 5 20;"
-        );
-        addCourseButton.setOnAction(event -> openAddCourseWindow());
-        
-
-        Button addClassButton = new Button("Add Class");
-        addClassButton.setStyle(
-            "-fx-font-size: 14px;" +
-            "-fx-background-color: white;" +
-            "-fx-text-fill: #001f3f;" +
-            "-fx-border-radius: 10;" +
-            "-fx-background-radius: 10;" +
-            "-fx-padding: 5 20;"
-        );
-        addClassButton.setOnAction(event -> openAddClassWindow());
+        menuBar.getMenus().addAll(fileMenu,addMenu,helpMenu);
 
     
         HBox topButtonBox = new HBox(20); 
-        topButtonBox.setAlignment(Pos.CENTER);
-        topButtonBox.getChildren().addAll(addCourseButton, addClassButton);
         VBox topContainer = new VBox(menuBar,topButtonBox);
         root.setTop(topContainer);
 
