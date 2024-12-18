@@ -22,14 +22,21 @@ public class Course {
     public Course(String code, String lecturer, String timing, int durationHours, String classroomName) {
         this(code, lecturer, timing, durationHours, classroomName, new ArrayList<>());
     }
+    public Course(String code, String lecturer, String timing, int durationHours, List<Student> enrolledStudents) {
+        this.code = code;
+        this.lecturer = lecturer;
+        setDayAndTime(timing);
+        this.classroom = null;
+        this.durationHours = durationHours;
+        this.enrolledStudents = enrolledStudents != null ? new ArrayList<>(enrolledStudents) : new ArrayList<>();
+    }
     
     public String toCsvString() {
         StringBuilder sb = new StringBuilder();
         sb.append(code).append(";")
           .append(day).append(" ").append(time).append(";")
           .append(durationHours).append(";")
-          .append(lecturer).append(";")
-          .append(classroom).append(";");
+          .append(lecturer).append(";");
 
         // Append enrolled students' names
         for (Student student : enrolledStudents) {

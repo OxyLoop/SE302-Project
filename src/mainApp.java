@@ -1,5 +1,6 @@
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -52,16 +53,15 @@ public class mainApp extends Application {
                     String time = timingParts[1];
                     int durationHours = Integer.parseInt(parts[2]);
                     String lecturer = parts[3];
-                    String classroomName = parts[4];
     
                     
                     List<Student> students = new ArrayList<>();
-                    for (int i = 5; i < parts.length; i++) {
+                    for (int i = 4; i < parts.length; i++) {
                         students.add(new Student(parts[i])); 
                     }
     
                    
-                    Course course = new Course(code, lecturer, day + " " + time, durationHours, classroomName, students);
+                    Course course = new Course(code, lecturer, day + " " + time, durationHours, students);
                     courses.add(course);
                 }
             }
@@ -73,16 +73,31 @@ public class mainApp extends Application {
     
 
     
-    private void exportCSV(String filePath, List<Course> courses) {
-        try (FileWriter writer = new FileWriter(filePath)) {
+    private void exportCSV(String filepath, List<Course> courses) {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(filepath))) {
             for (Course course : courses) {
-                writer.write(course.toCsvString());
-                writer.write("\n");
+                
+                StringBuilder line = new StringBuilder();
+                line.append(course.getCode()).append(";")  // Course code
+                    .append(course.getDay()).append(" ").append(course.getTime()).append(";")  // Day and time
+                    .append(course.getDurationHours()).append(";")  // Duration
+                    .append(course.getLecturer());  // Lecturer
+    
+                
+                for (Student student : course.getEnrolledStudents()) {
+                    line.append(";").append(student.getName());
+                }
+    
+                
+                bw.write(line.toString());
+                bw.newLine();
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+    
+
     private void importCSVButton() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV Files", "*.csv"));
