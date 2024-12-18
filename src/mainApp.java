@@ -10,6 +10,8 @@ import java.util.stream.Collectors;
 import javafx.stage.FileChooser;
 import java.io.File;
 import javafx.application.Application;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -19,9 +21,11 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
@@ -35,45 +39,38 @@ public class mainApp extends Application {
     private SchoolLecturePlanner planner = new SchoolLecturePlanner(); 
 
 
-     private List<Course> importCSV(String filePath) {
-        List<Course> importedCourses = new ArrayList<>();
-        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+    private List<Course> importCSV(String filepath) {
+        List<Course> courses = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new FileReader(filepath))) {
             String line;
-            while ((line = reader.readLine()) != null) {
-                
-                String[] courseData = line.split(";");
-                
-               
-                if (courseData.length >= 5) {
-                    String courseCode = courseData[0];
-                    String timing = courseData[1]; 
-                    int durationHours = Integer.parseInt(courseData[2]); 
-                    String lecturer = courseData[3];  
-                    
+            while ((line = br.readLine()) != null) {
+                String[] parts = line.split(";");
+                if (parts.length >= 5) { 
+                    String code = parts[0];
+                    String[] timingParts = parts[1].split(" ");
+                    String day = timingParts[0];
+                    String time = timingParts[1];
+                    int durationHours = Integer.parseInt(parts[2]);
+                    String lecturer = parts[3];
+                    String classroomName = parts[4];
+    
                     
                     List<Student> students = new ArrayList<>();
-                    for (int i = 4; i < courseData.length; i++) {
-                        if (!courseData[i].isEmpty()) {
-                            students.add(new Student(courseData[i])); 
-                        }
+                    for (int i = 5; i < parts.length; i++) {
+                        students.add(new Student(parts[i])); 
                     }
-                    
-                    
-                    Course course = new Course(courseCode, lecturer, timing, durationHours, ""); 
-                    for (Student student : students) {
-                        course.addStudent(student);  
-                    }
-                    
-                    importedCourses.add(course);
-                } else {
-                    System.out.println("Invalid CSV line: " + line); 
+    
+                   
+                    Course course = new Course(code, lecturer, day + " " + time, durationHours, classroomName, students);
+                    courses.add(course);
                 }
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return importedCourses;
+        return courses;
     }
+    
 
     
     private void exportCSV(String filePath, List<Course> courses) {
@@ -90,21 +87,38 @@ public class mainApp extends Application {
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV Files", "*.csv"));
         File file = fileChooser.showOpenDialog(null);
+        
         if (file != null) {
             List<Course> importedCourses = importCSV(file.getAbsolutePath());
             
             for (Course course : importedCourses) {
                 String code = course.getCode();
                 String lecturer = course.getLecturer();
-                String timing = course.getDay() + " " + course.getTime();  // Combine day and time
+                String timing = course.getDay() + " " + course.getTime(); 
                 int durationHours = course.getDurationHours();
                 String classroomName = course.getClassroom();
+    
                 
-                planner.addCourse(code, lecturer, timing, durationHours, classroomName);
+                List<Student> enrolledStudents = new ArrayList<>();
+                for (Student student : course.getEnrolledStudents()) {
+                    Student existingStudent = planner.findStudentByName(student.getName());
+                    if (existingStudent != null) {
+                        enrolledStudents.add(existingStudent);
+                    } else {
+                        
+                        Student newStudent = new Student(student.getName());
+                        planner.addStudent(newStudent);
+                        enrolledStudents.add(newStudent);
+                    }
+                }
+    
+                
+                planner.addCourse(code, lecturer, timing, durationHours, classroomName, enrolledStudents);
             }
             System.out.println("Courses imported from CSV.");
         }
     }
+    
     
     
     
@@ -312,34 +326,84 @@ public class mainApp extends Application {
     ComboBox<String> classroomComboBox = new ComboBox<>();
     classroomComboBox.getItems().addAll(planner.getClassroomNames());
 
-    // Add Button
-    Button addButton = new Button("Add Course");
-    addButton.setOnAction(event -> {
-        String code = codeField.getText().trim();
-        String lecturer = lecturerComboBox.getValue();
-        String day = dayChoiceBox.getValue();
-        String time = timeChoiceBox.getValue();
-        String duration = durationChoiceBox.getValue();
-        String classroomName = classroomComboBox.getValue();
 
-        if (!code.isEmpty() && !lecturer.isEmpty() && !day.isEmpty() && !time.isEmpty() && !duration.isEmpty() && classroomName != null) {
-            try {
-                int durationHours = Integer.parseInt(duration.split(" ")[0]);
-                String timing = day + " " + time; // Combine day and time
-                planner.addCourse(code, lecturer, timing, durationHours, classroomName);
+    // Student Management
+    Label studentLabel = new Label("Students:");
+    ListView<String> studentListView = new ListView<>();
+    studentListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+    studentListView.getItems().addAll(planner.getStudentNames());
 
-                // Save the new course to file
-                CSVLoader loader = new CSVLoader();
-                loader.writeCourseToFile(new Course(code, lecturer, timing, durationHours, classroomName), "data/Courses.csv");
+    Button addStudentButton = new Button("Add Student");
+    TextField newStudentField = new TextField();
+    newStudentField.setPromptText("Enter new student name");
 
-                newWindow.close();
-            } catch (NumberFormatException e) {
-                System.out.println("Duration must be a valid number!");
-            }
-        } else {
-            System.out.println("All fields are required!");
+    addStudentButton.setOnAction(event -> {
+        String newStudent = newStudentField.getText().trim();
+        if (!newStudent.isEmpty() && !studentListView.getItems().contains(newStudent)) {
+            studentListView.getItems().add(newStudent);
+            newStudentField.clear();
         }
     });
+
+    Button removeStudentButton = new Button("Remove Selected");
+    removeStudentButton.setOnAction(event -> {
+        studentListView.getItems().removeAll(studentListView.getSelectionModel().getSelectedItems());
+    });
+
+    HBox studentControls = new HBox(10, newStudentField, addStudentButton, removeStudentButton);
+    studentControls.setAlignment(Pos.CENTER);
+
+    
+    Button addButton = new Button("Add Course");
+    addButton.setOnAction(event -> {
+    String code = codeField.getText().trim();
+    String lecturer = lecturerComboBox.getValue();
+    String day = dayChoiceBox.getValue();
+    String time = timeChoiceBox.getValue();
+    String duration = durationChoiceBox.getValue();
+    String classroom = classroomComboBox.getValue();
+
+    
+    ObservableList<String> selectedStudentNames = FXCollections.observableArrayList(studentListView.getSelectionModel().getSelectedItems());
+    List<Student> selectedStudents = new ArrayList<>();
+
+    if (!code.isEmpty() && !lecturer.isEmpty() && !day.isEmpty() && !time.isEmpty() && !duration.isEmpty() && classroom != null) {
+        try {
+            int durationHours = Integer.parseInt(duration.split(" ")[0]);
+            String timing = day + " " + time; 
+
+           
+            for (String studentName : selectedStudentNames) {
+                
+                Student existingStudent = planner.findStudentByName(studentName);
+                if (existingStudent != null) {
+                    selectedStudents.add(existingStudent); 
+                } else {
+                    
+                    Student newStudent = new Student(studentName);
+                    planner.addStudent(newStudent);
+                    selectedStudents.add(newStudent);
+                }
+            }
+
+           
+            planner.addCourse(code, lecturer, timing, durationHours, classroom, selectedStudents);
+
+           
+            CSVLoader loader = new CSVLoader();
+            Course course = new Course(code, lecturer, timing, durationHours, classroom, selectedStudents);
+            loader.writeCourseToFile(course, "data/Courses.csv");
+
+            newWindow.close(); 
+        } catch (NumberFormatException e) {
+            System.out.println("Duration must be a valid number!");
+        }
+    } else {
+        System.out.println("All fields are required!");
+    }
+});
+
+    
 
     // Layout
     HBox lecturerBox = new HBox(10, lecturerComboBox, newLecturerField, addLecturerButton);
@@ -353,6 +417,7 @@ public class mainApp extends Application {
         timeLabel, timeChoiceBox,
         durationLabel, durationChoiceBox,
         classroomLabel, classroomComboBox,
+        studentLabel, studentListView, studentControls,
         addButton
     );
 

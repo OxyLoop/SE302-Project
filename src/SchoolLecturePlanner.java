@@ -93,6 +93,19 @@ public class SchoolLecturePlanner {
         return matchingCourses;
     }
 
+    public List<String> getStudentNames() {
+        List<String> studentNames = new ArrayList<>();
+        for (Student student : students) { 
+            studentNames.add(student.getName());
+        }
+        return studentNames;
+    }
+
+    public List<Student> getStudents() {
+        return students; 
+    }
+
+
     // bu fonksiyon öğrencilerin ortak zamanını görmek için.  GUI de bunun için buton olmalı ordan öğrenciler seçilebilmeli ve ortak zamanları bulunmalı
     /*public List<String> findJointFreeTimes(List<Integer> studentIds) { 
         List<Course> allEnrolledCourses = new ArrayList<>();
@@ -124,20 +137,20 @@ public class SchoolLecturePlanner {
     
 
     
-        public void addCourse(String code, String lecturer, String timing, int durationHours, String classroomName) {
+        public void addCourse(String code, String lecturer, String timing, int durationHours, String classroomName, List<Student> students) {
             Classroom classroom = findClassroomByName(classroomName);
             if (classroom == null) {
                 System.out.println("Classroom does not exist!");
                 return;
             }
         
-            
+            // Validate durationHours
             if (durationHours <= 0) {
                 System.out.println("Invalid duration! Duration must be a positive number of hours.");
                 return;
             }
         
-            
+            // Split and validate timing
             String[] timingParts = timing.split(" ");
             if (timingParts.length != 2) {
                 System.out.println("Invalid timing format! It should be 'Day Time'.");
@@ -152,15 +165,15 @@ public class SchoolLecturePlanner {
                 return;
             }
         
-           
-            Course course = new Course(code, lecturer, timing, durationHours, classroomName);
-            courses.add(course); 
+            // Create and add the course
+            Course course = new Course(code, lecturer, timing, durationHours, classroomName, students);
+            courses.add(course);
             classroom.setAvailable(false); 
             courseMap.put(code, course); 
         
             System.out.println("Course added: " + course);
-            
         }
+        
          
     
     public void removeCourse(String code) {
@@ -188,10 +201,16 @@ public class SchoolLecturePlanner {
         return null;
     }
 
-    public void addStudent(String name) {
+    /*public void addStudent(String name) {
         Student student = new Student(name);
         students.add(student);
         System.out.println("Student added: " + student);
+    }*/
+
+    public void addStudent(Student student) {
+        if (!students.contains(student)) { 
+            students.add(student);
+        }
     }
 
     /*public void enrollStudentToCourse(int studentId, String courseCode) {

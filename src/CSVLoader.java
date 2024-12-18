@@ -117,12 +117,12 @@ public class CSVLoader {
                 sb.append(student.getName()).append(";");
             }
     
-            
             writer.append(sb.toString()).append("\n");
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+    
 
     /*public void rewriteCoursesToFile(List<Course> courses, Course editedCourse, File courseFile) {
         

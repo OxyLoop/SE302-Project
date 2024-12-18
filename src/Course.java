@@ -10,41 +10,52 @@ public class Course {
     private int durationHours;
     private List<Student> enrolledStudents;
 
-    public Course(String code, String lecturer, String timing, int durationHours, String classroomName) {
+    public Course(String code, String lecturer, String timing, int durationHours, String classroom, List<Student> enrolledStudents) {
         this.code = code;
         this.lecturer = lecturer;
         setDayAndTime(timing);
-        this.classroom = classroomName;
-        this.durationHours = durationHours; 
-        this.enrolledStudents = new ArrayList<>(); 
+        this.classroom = classroom;
+        this.durationHours = durationHours;
+        this.enrolledStudents = enrolledStudents != null ? new ArrayList<>(enrolledStudents) : new ArrayList<>();
     }
 
+    public Course(String code, String lecturer, String timing, int durationHours, String classroomName) {
+        this(code, lecturer, timing, durationHours, classroomName, new ArrayList<>());
+    }
     
     public String toCsvString() {
         StringBuilder sb = new StringBuilder();
         sb.append(code).append(";")
           .append(day).append(" ").append(time).append(";")
           .append(durationHours).append(";")
-          .append(lecturer).append(";");
-        
-        // Append enrolled students
+          .append(lecturer).append(";")
+          .append(classroom).append(";");
+
+        // Append enrolled students' names
         for (Student student : enrolledStudents) {
             sb.append(student.getName()).append(";");
         }
-        
+
         return sb.toString();
     }
     
     public void addStudent(Student student) {
-        enrolledStudents.add(student);
+        if (!enrolledStudents.contains(student)) {
+            enrolledStudents.add(student);
+            student.addCourse(this); 
+        }
     }
 
+    
     public void removeStudent(Student student) {
-        enrolledStudents.remove(student);
+        if (enrolledStudents.remove(student)) {
+            student.removeCourse(this); 
+        }
     }
 
+    
     public List<Student> getEnrolledStudents() {
-        return enrolledStudents;
+        return new ArrayList<>(enrolledStudents); 
     }
 
     private void setDayAndTime(String timing) {
@@ -108,5 +119,18 @@ public class Course {
         } else {
             throw new IllegalArgumentException("Duration must be a positive integer.");
         }
+    }
+
+    @Override
+    public String toString() {
+        return "Course{" +
+                "code='" + code + '\'' +
+                ", lecturer='" + lecturer + '\'' +
+                ", day='" + day + '\'' +
+                ", time='" + time + '\'' +
+                ", classroom='" + classroom + '\'' +
+                ", durationHours=" + durationHours +
+                ", enrolledStudents=" + enrolledStudents +
+                '}';
     }
 }
