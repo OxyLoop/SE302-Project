@@ -40,14 +40,16 @@ public class CSVLoader {
                     String[] studentNames = extractStudentNames(data);
                     String classroomName = findAvailableClassroom(classrooms);
                     if (classroomName == null) {
+                        classroomName = "No Classroom Available";
                         System.out.println("No available classroom for course: " + code);
-                        continue;
+                   
                     }
                     Course course = new Course(code, lecturer, timing, durationHours, classroomName );
                     courses.add(course);
                     courseMap.put(code, course);
-                    assignCourseToClassroom(classroomName, classrooms, course);
-                    //assignStudentsToCourse(studentNames, course, studentMap);
+                    if (!classroomName.equals("No Classroom Available")) {
+                        assignCourseToClassroom(classroomName, classrooms, course);
+                    }
 
                     for (String studentName : studentNames) {
                         Student student = studentMap.get(studentName);
