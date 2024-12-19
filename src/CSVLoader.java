@@ -47,7 +47,17 @@ public class CSVLoader {
                     courses.add(course);
                     courseMap.put(code, course);
                     assignCourseToClassroom(classroomName, classrooms, course);
-                    assignStudentsToCourse(studentNames, course, studentMap);
+                    //assignStudentsToCourse(studentNames, course, studentMap);
+
+                    for (String studentName : studentNames) {
+                        Student student = studentMap.get(studentName);
+                        if (student == null) {
+                            student = new Student(studentName);
+                            studentMap.put(studentName, student);
+                        }
+                        student.addCourse(course);
+                        course.getStudents().add(student);
+                    }
                 }
             }
         } catch (IOException e) {

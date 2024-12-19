@@ -73,7 +73,7 @@ public class mainApp extends Application {
     
 
     
-    private void exportCSV(String filepath, List<Course> courses) {
+    /*private void exportCSV(String filepath, List<Course> courses) {
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(filepath))) {
             for (Course course : courses) {
                 
@@ -94,6 +94,38 @@ public class mainApp extends Application {
             }
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }*/
+
+    /*public void exportCSV(String filename, List<Course> courses) {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(filename))) {
+            for (Course course : courses) {
+                StringBuilder studentNames = new StringBuilder();
+                for (Student student : course.getStudents()) {
+                    if (studentNames.length() > 0) {
+                        studentNames.append(";");
+                    }
+                    studentNames.append(student.getName());
+                }
+                bw.write(String.format("%s;%s;%d;%s;%s\n",
+                        course.getCode(),
+                        course.getTiming(),
+                        course.getDurationHours(),
+                        course.getLecturer(),
+                        studentNames.toString()));
+            }
+        } catch (IOException e) {
+            System.err.println("Error exporting courses and students: " + e.getMessage());
+        }
+    }*/
+
+    public void exportCSV(String filename, List<Course> courses) {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(filename))) {
+            for (Course course : courses) {
+                bw.write(course.toCsvString() + "\n");
+            }
+        } catch (IOException e) {
+            System.err.println("Error exporting courses and students: " + e.getMessage());
         }
     }
     

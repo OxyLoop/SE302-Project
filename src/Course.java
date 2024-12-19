@@ -39,8 +39,11 @@ public class Course {
           .append(lecturer).append(";");
 
         // Append enrolled students' names
-        for (Student student : enrolledStudents) {
-            sb.append(student.getName()).append(";");
+        for (int i = 0; i < enrolledStudents.size(); i++) {
+            sb.append(enrolledStudents.get(i).getName());
+            if (i < enrolledStudents.size() - 1) {
+                sb.append(";");
+            }
         }
 
         return sb.toString();
@@ -52,7 +55,9 @@ public class Course {
             student.addCourse(this); 
         }
     }
-
+    public List<Student> getStudents() {
+        return enrolledStudents;
+    }
     
     public void removeStudent(Student student) {
         if (enrolledStudents.remove(student)) {
@@ -74,6 +79,10 @@ public class Course {
             this.day = "";
             this.time = timing;  
         }
+    }
+
+    public String getTiming() {
+        return day + " " + time;
     }
 
     public String getCode() {
