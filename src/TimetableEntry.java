@@ -1,11 +1,14 @@
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.RowConstraints;
@@ -134,17 +137,39 @@ public class TimetableEntry extends Application {
         Label timeLabel = new Label("Time: " + course.getTime());
         Label durationLabel = new Label("Duration: " + course.getDurationHours() + " hour(s)");
     
+        Label studentsLabel = new Label("Enrolled Students:");
+        studentsLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
+    
+        // Fetch enrolled students
+        List<String> enrolledStudentNames = course.getEnrolledStudents().stream()
+                                                  .map(Student::getName)
+                                                  .sorted(String::compareToIgnoreCase)
+                                                  .collect(Collectors.toList());
+    
+        // Display number of students
+        Label studentCountLabel = new Label("Number of Students: " + enrolledStudentNames.size());
+        studentCountLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
+    
+        ListView<String> studentListView = new ListView<>();
+        studentListView.setStyle("-fx-font-size: 14px;");
+        studentListView.getItems().addAll(enrolledStudentNames);
+    
         Button editButton = new Button("Edit");
         editButton.setStyle("-fx-font-size: 14px; -fx-padding: 5 10;");
         editButton.setOnAction(event -> openEditForm(course, detailStage));
+
+        vbox.getChildren().addAll(
+            detailLabel, codeLabel, lecturerLabel, dayLabel, timeLabel, durationLabel, 
+            studentsLabel,studentCountLabel, studentListView, editButton
+        );
     
-        vbox.getChildren().addAll(detailLabel, codeLabel, lecturerLabel, dayLabel, timeLabel, durationLabel, editButton);
-    
-        Scene detailScene = new Scene(vbox, 300, 250);
+        Scene detailScene = new Scene(vbox, 300, 450);
         detailStage.setScene(detailScene);
-        detailStage.setTitle("Course Details");
+        detailStage.setTitle("Course Details: " + course.getCode());
         detailStage.show();
     }
+    
+    
     
     private void openEditForm(Course course, Stage parentStage) {
         Stage editStage = new Stage();
