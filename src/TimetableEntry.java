@@ -9,8 +9,10 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -45,11 +47,27 @@ public class TimetableEntry extends Application {
         this.courseFile = courseFile;
     }
 
-    @Override
     public void start(Stage primaryStage) {
         this.tableStage = primaryStage;
-        this.gridPane = createTimetableGrid();
-        Scene scene = new Scene(gridPane, 900, 600);
+
+        // Create a ScrollPane to wrap the GridPane
+        ScrollPane scrollPane = new ScrollPane();
+        scrollPane.setContent(createTimetableGrid());
+        scrollPane.setFitToWidth(true);
+        scrollPane.setFitToHeight(true);
+
+        VBox.setVgrow(scrollPane, Priority.ALWAYS);
+
+        // Create the layout
+        VBox layout = new VBox();
+        layout.setSpacing(10);
+        layout.setStyle("-fx-padding: 20; -fx-alignment: center;");
+        Label title = new Label("Timetable");
+        title.setStyle("-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #001f3f;");
+        layout.getChildren().addAll(title, scrollPane);
+
+        // Set the scene with increased dimensions
+        Scene scene = new Scene(layout, 1000, 700); // Adjusted dimensions
         tableStage.setScene(scene);
         tableStage.setTitle("Timetable");
         tableStage.show();
@@ -58,55 +76,43 @@ public class TimetableEntry extends Application {
     private GridPane createTimetableGrid() {
         GridPane grid = new GridPane();
         grid.setGridLinesVisible(true);
-
+    
         for (int col = 0; col <= 7; col++) {
-            ColumnConstraints colConst = new ColumnConstraints(100);
+            ColumnConstraints colConst = new ColumnConstraints(120); // Wider columns
             grid.getColumnConstraints().add(colConst);
         }
         for (int row = 0; row <= 16; row++) {
-            RowConstraints rowConst = new RowConstraints(50);
+            RowConstraints rowConst = new RowConstraints(50); // Uniform row height
             grid.getRowConstraints().add(rowConst);
         }
-
+    
         String[] days = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
         for (int col = 1; col <= days.length; col++) {
             Label dayLabel = new Label(days[col - 1]);
-            dayLabel.setStyle("-fx-font-weight: bold; -fx-alignment: center;");
+            dayLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #001f3f; -fx-alignment: center;");
             grid.add(dayLabel, col, 0);
         }
-
+    
         String[] times = {
             "08:30", "09:25", "10:20", "11:15", "12:10", "13:05", "14:00", "14:55",
             "15:50", "16:45", "17:40", "18:35", "19:30", "20:25", "21:20", "22:15"
         };
         for (int row = 1; row <= times.length; row++) {
             Label timeLabel = new Label(times[row - 1]);
-            timeLabel.setStyle("-fx-font-weight: bold; -fx-alignment: center;");
+            timeLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #001f3f; -fx-alignment: center;");
             grid.add(timeLabel, 0, row);
         }
-        //Timetableda boş olan yere ders ordan değil de asıl panelden ekleyelim - Arda
-        /* 
-        for (int row = 1; row <= times.length; row++) {
-            for (int col = 1; col <= days.length; col++) {
-                Button emptyButton = new Button("");
-                emptyButton.setStyle("-fx-border-color: black; -fx-background-color: white; -fx-alignment: center;");
-                emptyButton.setOnAction(event -> {
-                    System.out.println("Empty slot clicked!");
-                });
-                grid.add(emptyButton, col, row);
-            }
-        }
-            */
-
+    
         for (Course course : filteredCourses) {
             int col = getColumnForDay(course.getDay());
             int startRow = getRowForTime(course.getTime());
             int duration = course.getDurationHours();
             addClassToGrid(grid, course, col, startRow, duration);
         }
-
+    
         return grid;
     }
+    
 
     private void addClassToGrid(GridPane grid, Course course, int col, int startRow, int duration) {
         for (int i = 0; i < duration; i++) {

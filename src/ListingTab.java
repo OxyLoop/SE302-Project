@@ -2,6 +2,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
@@ -33,9 +34,9 @@ public class ListingTab {
 
         ListView<String> listView = new ListView<>();
         listView.setStyle("-fx-font-size: 14px;");
+        VBox.setVgrow(listView, Priority.ALWAYS); // Ensure it grows with the VBox
 
         List<String> data = fetchData();
-
         listView.getItems().addAll(data);
 
         TextField searchBar = new TextField();
@@ -55,18 +56,18 @@ public class ListingTab {
         listView.setOnMouseClicked(event -> {
             String selectedItem = listView.getSelectionModel().getSelectedItem();
             if (selectedItem != null && !selectedItem.equals("No items found")) {
-                handleItemClick(selectedItem, csvLoader, courseFile); 
+                handleItemClick(selectedItem, csvLoader, courseFile);
             }
         });
 
-
         vbox.getChildren().addAll(title, searchBar, listView);
 
-        Scene scene = new Scene(vbox, 400, 500);
+        Scene scene = new Scene(vbox, 600, 700); // Increased dimensions
         newWindow.setTitle(getTitle());
         newWindow.setScene(scene);
         newWindow.show();
     }
+
 
     private String getTitle() {
         switch (type) {
