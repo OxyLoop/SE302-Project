@@ -174,6 +174,15 @@ public class CSVLoader {
             e.printStackTrace();
         }
     }
+    public void exportCSV(String filename, List<Course> courses) {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(filename))) {
+            for (Course course : courses) {
+                bw.write(course.toCsvString() + "\n");
+            }
+        } catch (IOException e) {
+            System.err.println("Error exporting courses and students: " + e.getMessage());
+        }
+    }
 
 
 }

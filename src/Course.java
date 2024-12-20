@@ -136,6 +136,12 @@ public class Course {
             throw new IllegalArgumentException("Duration must be a positive integer.");
         }
     }
+    public void clearSchedule() {
+        this.day = null;
+        this.time = null;
+        this.classroom = null;
+        this.durationHours = 0;
+    }
 
     @Override
     public String toString() {

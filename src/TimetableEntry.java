@@ -32,12 +32,13 @@ public class TimetableEntry extends Application {
 
     public TimetableEntry() {}
 
-    public TimetableEntry(String day, String course, String classroom, String lecturer, String time) {
+    public TimetableEntry(String day, String course, String classroom, String lecturer, String time, SchoolLecturePlanner planner) {
         this.day = day;
         this.course = course;
         this.classroom = classroom;
         this.lecturer = lecturer;
         this.time = time;
+        this.planner = planner;
     }
 
     public TimetableEntry(List<Course> filteredCourses, SchoolLecturePlanner planner, CSVLoader csvLoader, String courseFile) {
@@ -47,18 +48,16 @@ public class TimetableEntry extends Application {
         this.courseFile = courseFile;
     }
 
+    @Override
     public void start(Stage primaryStage) {
         this.tableStage = primaryStage;
 
-        // Create a ScrollPane to wrap the GridPane
         ScrollPane scrollPane = new ScrollPane();
-        scrollPane.setContent(createTimetableGrid());
+        this.gridPane = createTimetableGrid();
+        scrollPane.setContent(gridPane);
         scrollPane.setFitToWidth(true);
         scrollPane.setFitToHeight(true);
 
-        VBox.setVgrow(scrollPane, Priority.ALWAYS);
-
-        // Create the layout
         VBox layout = new VBox();
         layout.setSpacing(10);
         layout.setStyle("-fx-padding: 20; -fx-alignment: center;");
@@ -66,33 +65,36 @@ public class TimetableEntry extends Application {
         title.setStyle("-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #001f3f;");
         layout.getChildren().addAll(title, scrollPane);
 
-        // Set the scene with increased dimensions
-        Scene scene = new Scene(layout, 1000, 700); // Adjusted dimensions
+        Scene scene = new Scene(layout, 1000, 700);
         tableStage.setScene(scene);
         tableStage.setTitle("Timetable");
         tableStage.show();
     }
 
     private GridPane createTimetableGrid() {
+        for (Course course : filteredCourses) {
+            System.out.println("Course: " + course.getCode() + ", Time: " + course.getTime() + ", Day: " + course.getDay());
+        }
+
         GridPane grid = new GridPane();
         grid.setGridLinesVisible(true);
-    
+
         for (int col = 0; col <= 7; col++) {
-            ColumnConstraints colConst = new ColumnConstraints(120); // Wider columns
+            ColumnConstraints colConst = new ColumnConstraints(120);
             grid.getColumnConstraints().add(colConst);
         }
         for (int row = 0; row <= 16; row++) {
-            RowConstraints rowConst = new RowConstraints(50); // Uniform row height
+            RowConstraints rowConst = new RowConstraints(50);
             grid.getRowConstraints().add(rowConst);
         }
-    
+
         String[] days = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
         for (int col = 1; col <= days.length; col++) {
             Label dayLabel = new Label(days[col - 1]);
             dayLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #001f3f; -fx-alignment: center;");
             grid.add(dayLabel, col, 0);
         }
-    
+
         String[] times = {
             "08:30", "09:25", "10:20", "11:15", "12:10", "13:05", "14:00", "14:55",
             "15:50", "16:45", "17:40", "18:35", "19:30", "20:25", "21:20", "22:15"
@@ -102,19 +104,27 @@ public class TimetableEntry extends Application {
             timeLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #001f3f; -fx-alignment: center;");
             grid.add(timeLabel, 0, row);
         }
-    
+
         for (Course course : filteredCourses) {
             int col = getColumnForDay(course.getDay());
+            if (col == -1) continue;
+
             int startRow = getRowForTime(course.getTime());
+            if (startRow == -1) continue;
+
             int duration = course.getDurationHours();
             addClassToGrid(grid, course, col, startRow, duration);
         }
-    
+
         return grid;
     }
-    
 
     private void addClassToGrid(GridPane grid, Course course, int col, int startRow, int duration) {
+        if (startRow == -1) {
+            System.err.println("Invalid time detected for course: " + course.getCode() + " (" + course.getTime() + ")");
+            return;
+        }
+
         for (int i = 0; i < duration; i++) {
             Button hourButton = new Button(course.getCode() + " (" + (i + 1) + "h)");
             hourButton.setStyle("-fx-border-color: black; -fx-padding: 10; -fx-background-color: lightblue; -fx-alignment: center;");
@@ -130,19 +140,19 @@ public class TimetableEntry extends Application {
 
     private void openEditTab(Course course) {
         Stage detailStage = new Stage();
-    
+
         VBox vbox = new VBox(10);
         vbox.setStyle("-fx-alignment: center; -fx-padding: 20;");
-    
+
         Label detailLabel = new Label("Course Details");
         detailLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
-    
+
         Label codeLabel = new Label("Course Code: " + course.getCode());
         Label lecturerLabel = new Label("Lecturer: " + course.getLecturer());
         Label dayLabel = new Label("Day: " + course.getDay());
         Label timeLabel = new Label("Time: " + course.getTime());
         Label durationLabel = new Label("Duration: " + course.getDurationHours() + " hour(s)");
-    
+
         Label studentsLabel = new Label("Enrolled Students:");
         studentsLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
     
@@ -159,82 +169,104 @@ public class TimetableEntry extends Application {
         ListView<String> studentListView = new ListView<>();
         studentListView.setStyle("-fx-font-size: 14px;");
         studentListView.getItems().addAll(enrolledStudentNames);
-    
+        
         Button editButton = new Button("Edit");
         editButton.setStyle("-fx-font-size: 14px; -fx-padding: 5 10;");
         editButton.setOnAction(event -> openEditForm(course, detailStage));
 
+        Button deleteButton = new Button("Delete");
+        deleteButton.setStyle("-fx-font-size: 14px; -fx-padding: 5 10; -fx-background-color: red; -fx-text-fill: white;");
+        deleteButton.setOnAction(event -> {
+            course.clearSchedule();
+            csvLoader.exportCSV(courseFile, planner.getCourses());
+            updateTimetable();
+            detailStage.close();
+        });
+
         vbox.getChildren().addAll(
             detailLabel, codeLabel, lecturerLabel, dayLabel, timeLabel, durationLabel, 
-            studentsLabel,studentCountLabel, studentListView, editButton
+            studentsLabel,studentCountLabel, studentListView, editButton, deleteButton
         );
-    
+
         Scene detailScene = new Scene(vbox, 300, 450);
         detailStage.setScene(detailScene);
         detailStage.setTitle("Course Details: " + course.getCode());
         detailStage.show();
     }
-    
-    
-    
+
     private void openEditForm(Course course, Stage parentStage) {
         Stage editStage = new Stage();
-    
+
         VBox vbox = new VBox(10);
         vbox.setStyle("-fx-alignment: center; -fx-padding: 20;");
-    
+
         Label editLabel = new Label("Edit Course Details");
         editLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
-    
+
         ChoiceBox<String> dayChoice = new ChoiceBox<>();
         dayChoice.getItems().addAll("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday");
         dayChoice.setValue(course.getDay());
-    
+
         ChoiceBox<String> timeChoice = new ChoiceBox<>();
         timeChoice.getItems().addAll(
             "08:30", "09:25", "10:20", "11:15", "12:10", "13:05", "14:00", "14:55",
             "15:50", "16:45", "17:40", "18:35", "19:30", "20:25", "21:20", "22:15"
         );
         timeChoice.setValue(course.getTime());
-    
+
         ChoiceBox<String> durationChoice = new ChoiceBox<>();
         for (int i = 1; i <= 6; i++) {
             durationChoice.getItems().add(i + " hour(s)");
         }
         durationChoice.setValue(course.getDurationHours() + " hour(s)");
-    
+
         Button saveButton = new Button("Save Changes");
         saveButton.setStyle("-fx-font-size: 14px; -fx-padding: 5 10;");
         saveButton.setOnAction(event -> {
             course.setDay(dayChoice.getValue());
             course.setTime(timeChoice.getValue());
             course.setDurationHours(Integer.parseInt(durationChoice.getValue().split(" ")[0]));
+            csvLoader.exportCSV(courseFile, planner.getCourses());
             editStage.close();
             parentStage.close();
             updateTimetable();
         });
-    
+
         vbox.getChildren().addAll(editLabel, new Label("Day:"), dayChoice, new Label("Time:"), timeChoice, new Label("Duration:"), durationChoice, saveButton);
-    
+
         Scene editScene = new Scene(vbox, 300, 250);
         editStage.setScene(editScene);
         editStage.setTitle("Edit Course");
         editStage.show();
     }
-    
 
     private void updateTimetable() {
         gridPane.getChildren().removeIf(node -> node instanceof Button && node.getStyle().contains("lightblue"));
 
         for (Course course : filteredCourses) {
+            if (course.getTime() == null || course.getDay() == null) {
+                System.err.println("Course has null time or day: " + course.getCode());
+                continue;
+            }
+
             int col = getColumnForDay(course.getDay());
             int startRow = getRowForTime(course.getTime());
+
+            if (col == -1 || startRow == -1) {
+                System.err.println("Invalid column or row for course: " + course.getCode());
+                continue;
+            }
+
             int duration = course.getDurationHours();
             addClassToGrid(gridPane, course, col, startRow, duration);
         }
     }
 
     private int getColumnForDay(String day) {
+        if (day == null) {
+            return -1;
+        }
+
         switch (day) {
             case "Monday": return 1;
             case "Tuesday": return 2;
@@ -243,30 +275,33 @@ public class TimetableEntry extends Application {
             case "Friday": return 5;
             case "Saturday": return 6;
             case "Sunday": return 7;
-            default: return 0;
+            default: return -1;
         }
     }
 
     private int getRowForTime(String time) {
-        switch (time) {
-            case "08:30": return 1;
-            case "09:25": return 2;
-            case "10:20": return 3;
-            case "11:15": return 4;
-            case "12:10": return 5;
-            case "13:05": return 6;
-            case "14:00": return 7;
-            case "14:55": return 8;
-            case "15:50": return 9;
-            case "16:45": return 10;
-            case "17:40": return 11;
-            case "18:35": return 12;
-            case "19:30": return 13;
-            case "20:25": return 14;
-            case "21:20": return 15;
-            case "22:15": return 16;
-            default: return 1;
+        if (time == null) {
+            System.err.println("Time is null. Returning -1.");
+            return -1;
         }
+
+        String[] times = {
+            "08:30", "09:25", "10:20", "11:15", "12:10", "13:05", "14:00", "14:55",
+            "15:50", "16:45", "17:40", "18:35", "19:30", "20:25", "21:20", "22:15"
+        };
+
+        if (time.length() == 4) {
+            time = "0" + time;
+        }
+
+        for (int i = 0; i < times.length; i++) {
+            if (times[i].equals(time)) {
+                return i + 1;
+            }
+        }
+
+        System.err.println("Invalid time: " + time);
+        return -1;
     }
 
     public String getDay() {
