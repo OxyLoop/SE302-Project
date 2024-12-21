@@ -39,6 +39,15 @@ public class mainApp extends Application {
     
     private SchoolLecturePlanner planner = new SchoolLecturePlanner(); 
 
+    private Label totalStudentsLabel = new Label("Total Students: 0");
+    private Label totalCoursesLabel = new Label("Total Courses: 0");
+    private Label totalClassroomsLabel = new Label("Total Classrooms: 0");
+
+    private void updateDashboard() {
+        totalStudentsLabel.setText(String.valueOf(planner.getStudents().size()));
+        totalCoursesLabel.setText(String.valueOf(planner.getCourses().size()));
+        totalClassroomsLabel.setText(String.valueOf(planner.getClassrooms().size()));
+    }
 
     private List<Course> importCSV(String filepath) {
         List<Course> courses = new ArrayList<>();
@@ -184,6 +193,8 @@ public class mainApp extends Application {
         planner.loadClassrooms("data/ClassroomCapacity.csv");
         planner.loadCourses("data/Courses.csv");
         
+        primaryStage.setTitle("School Lecture Planner");
+
         BorderPane root = new BorderPane();
         root.setStyle("-fx-background-color: #001f3f");
 
@@ -228,9 +239,43 @@ public class mainApp extends Application {
     
         HBox topButtonBox = new HBox(20); 
         VBox topContainer = new VBox(menuBar,topButtonBox);
+       
+
+            // Dashboard
+        HBox dashboard = new HBox(20);
+        dashboard.setAlignment(Pos.CENTER);
+        dashboard.setStyle("-fx-padding: 20;");
+
+        VBox studentsBox = new VBox(5);
+        studentsBox.setStyle("-fx-background-color: white; -fx-padding: 10; -fx-border-color: black; -fx-border-width: 2; -fx-border-radius: 5; -fx-background-radius: 5;");
+        Label studentsLabel = new Label("Total Students");
+        studentsLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: black;");
+        totalStudentsLabel.setStyle("-fx-font-size: 36px; -fx-text-fill: black;");
+        studentsBox.getChildren().addAll(studentsLabel, totalStudentsLabel);
+
+        VBox coursesBox = new VBox(5);
+        coursesBox.setStyle("-fx-background-color: white; -fx-padding: 10; -fx-border-color: black; -fx-border-width: 2; -fx-border-radius: 5; -fx-background-radius: 5;");
+        Label coursesLabel = new Label("Total Courses");
+        coursesLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: black;");
+        totalCoursesLabel.setStyle("-fx-font-size: 36px; -fx-text-fill: black;");
+        coursesBox.getChildren().addAll(coursesLabel, totalCoursesLabel);
+
+        VBox classroomsBox = new VBox(5);
+        classroomsBox.setStyle("-fx-background-color: white; -fx-padding: 10; -fx-border-color: black; -fx-border-width: 2; -fx-border-radius: 5; -fx-background-radius: 5;");
+        Label classroomsLabel = new Label("Total Classrooms");
+        classroomsLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: black;");
+        totalClassroomsLabel.setStyle("-fx-font-size: 36px; -fx-text-fill: black;");
+        classroomsBox.getChildren().addAll(classroomsLabel, totalClassroomsLabel);
+
+        dashboard.getChildren().addAll(studentsBox, coursesBox, classroomsBox);
+        VBox dashboardContainer = new VBox(dashboard);
+        dashboardContainer.setAlignment(Pos.CENTER);
+        dashboardContainer.setStyle("-fx-padding: 20;");
+
+        topContainer.getChildren().add(dashboardContainer);
+
         root.setTop(topContainer);
-
-
+    
 
         VBox vbox = new VBox(20);
         vbox.setStyle("-fx-alignment: center;");
@@ -302,10 +347,12 @@ public class mainApp extends Application {
 
         root.setCenter(vbox);
 
-        Scene scene = new Scene(root, 400, 300);
+        Scene scene = new Scene(root, 800, 600);
         primaryStage.setTitle("School Management");
         primaryStage.setScene(scene);
         primaryStage.show();
+
+        updateDashboard();
     }
     
     private void openAddCourseWindow() {

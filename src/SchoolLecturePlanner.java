@@ -15,6 +15,8 @@ public class SchoolLecturePlanner {
     private Map<String, Course> courseMap; // Course code to Course object map
     private Map<String, Student> studentMap; // Student name to Student object map
     private CSVLoader csvLoader;
+    private mainApp app;
+
 
     public SchoolLecturePlanner() {
         this.students = new ArrayList<>();
@@ -167,6 +169,7 @@ public class SchoolLecturePlanner {
             // Create and add the course
             Course course = new Course(code, lecturer, timing, durationHours, classroomName, students);
             courses.add(course);
+        
             classroom.setAvailable(false); 
             courseMap.put(code, course); 
         
@@ -210,6 +213,7 @@ public class SchoolLecturePlanner {
         if (!students.contains(student)) { 
             students.add(student);
         }
+        
     }
 
     /*public void enrollStudentToCourse(int studentId, String courseCode) {
@@ -260,6 +264,7 @@ public class SchoolLecturePlanner {
     public void addClassroom(String name, int capacity) {
         Classroom classroom = new Classroom(name, capacity);
         classrooms.add(classroom);
+        
         System.out.println("Classroom added: " + classroom);
     }
 
