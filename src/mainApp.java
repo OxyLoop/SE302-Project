@@ -33,7 +33,12 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.web.WebEngine;
+import javafx.scene.web.WebView;
+import javafx.stage.FileChooser;
+import java.io.InputStream;
 import javafx.stage.Stage;
+import java.awt.Desktop;
 //asdasdasdasd
 public class mainApp extends Application {
     
@@ -190,6 +195,7 @@ public class mainApp extends Application {
     @Override
     //MAIN TAB FOR APPLICATION
     public void start(Stage primaryStage) {
+        
         planner.loadClassrooms("data/ClassroomCapacity.csv");
         planner.loadCourses("data/Courses.csv");
         primaryStage.setTitle("School Lecture Planner");
@@ -220,6 +226,25 @@ public class mainApp extends Application {
             alert.showAndWait();
         });
         MenuItem manualMenuItem = new MenuItem("Manual");
+
+        manualMenuItem.setOnAction(e -> {
+            try {
+                File pdfFile = new File("src/resources/UserManual.pdf");
+                if (pdfFile.exists()) {
+                    if (Desktop.isDesktopSupported()) {
+                        Desktop.getDesktop().open(pdfFile);
+                    } else {
+                        System.out.println("Awt Desktop is not supported!");
+                    }
+                } else {
+                    System.out.println("File does not exist!");
+                }
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        });
+
+    
         helpMenu.getItems().addAll(aboutMenuItem, manualMenuItem);
 
         Menu addMenu = new Menu("New");
