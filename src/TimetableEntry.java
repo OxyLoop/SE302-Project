@@ -10,6 +10,7 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
@@ -29,6 +30,7 @@ public class TimetableEntry extends Application {
     private Stage tableStage;
     private CSVLoader csvLoader;
     private String courseFile;
+    private boolean isLecturesMode;
 
     public TimetableEntry() {}
 
@@ -41,11 +43,12 @@ public class TimetableEntry extends Application {
         this.planner = planner;
     }
 
-    public TimetableEntry(List<Course> filteredCourses, SchoolLecturePlanner planner, CSVLoader csvLoader, String courseFile) {
+    public TimetableEntry(List<Course> filteredCourses, SchoolLecturePlanner planner, CSVLoader csvLoader, String courseFile, boolean isLecturesMode) {
         this.filteredCourses = filteredCourses;
         this.planner = planner;
         this.csvLoader = csvLoader;
         this.courseFile = courseFile;
+        this.isLecturesMode = isLecturesMode; // Lectures modunda mı çalışıyor?
     }
 
     @Override
@@ -140,59 +143,45 @@ public class TimetableEntry extends Application {
 
     private void openEditTab(Course course) {
         Stage detailStage = new Stage();
-
+    
         VBox vbox = new VBox(10);
         vbox.setStyle("-fx-alignment: center; -fx-padding: 20;");
-
+    
         Label detailLabel = new Label("Course Details");
         detailLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
-
+    
         Label codeLabel = new Label("Course Code: " + course.getCode());
         Label lecturerLabel = new Label("Lecturer: " + course.getLecturer());
         Label dayLabel = new Label("Day: " + course.getDay());
         Label timeLabel = new Label("Time: " + course.getTime());
         Label durationLabel = new Label("Duration: " + course.getDurationHours() + " hour(s)");
-
+    
         Label studentsLabel = new Label("Enrolled Students:");
         studentsLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
     
-        // Fetch enrolled students
-        List<String> enrolledStudentNames = course.getEnrolledStudents().stream()
-                                                  .map(Student::getName)
-                                                  .sorted(String::compareToIgnoreCase)
-                                                  .collect(Collectors.toList());
-    
-        // Display number of students
-        Label studentCountLabel = new Label("Number of Students: " + enrolledStudentNames.size());
-        studentCountLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
-    
         ListView<String> studentListView = new ListView<>();
         studentListView.setStyle("-fx-font-size: 14px;");
-        studentListView.getItems().addAll(enrolledStudentNames);
-        
-        Button editButton = new Button("Edit");
-        editButton.setStyle("-fx-font-size: 14px; -fx-padding: 5 10;");
-        editButton.setOnAction(event -> openEditForm(course, detailStage));
-
-        Button deleteButton = new Button("Delete");
-        deleteButton.setStyle("-fx-font-size: 14px; -fx-padding: 5 10; -fx-background-color: red; -fx-text-fill: white;");
-        deleteButton.setOnAction(event -> {
-            course.clearSchedule();
-            csvLoader.exportCSV(courseFile, planner.getCourses());
-            updateTimetable();
-            detailStage.close();
-        });
-
-        vbox.getChildren().addAll(
-            detailLabel, codeLabel, lecturerLabel, dayLabel, timeLabel, durationLabel, 
-            studentsLabel,studentCountLabel, studentListView, editButton, deleteButton
+        studentListView.getItems().addAll(
+            course.getEnrolledStudents().stream().map(Student::getName).sorted().collect(Collectors.toList())
         );
-
-        Scene detailScene = new Scene(vbox, 300, 450);
+    
+        VBox content = new VBox(10, detailLabel, codeLabel, lecturerLabel, dayLabel, timeLabel, durationLabel, studentsLabel, studentListView);
+    
+        // Eğer lectures modundaysa Edit butonunu ekle
+        if (isLecturesMode) {
+            Button editButton = new Button("Edit");
+            editButton.setStyle("-fx-font-size: 14px; -fx-padding: 5 10;");
+            editButton.setOnAction(event -> openEditForm(course, detailStage));
+            content.getChildren().add(editButton);
+        }
+    
+        Scene detailScene = new Scene(content, 300, 450);
         detailStage.setScene(detailScene);
         detailStage.setTitle("Course Details: " + course.getCode());
         detailStage.show();
     }
+    
+
 
     private void openEditForm(Course course, Stage parentStage) {
         Stage editStage = new Stage();

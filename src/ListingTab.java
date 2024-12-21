@@ -127,7 +127,7 @@ public class ListingTab {
 
     private void showStudentTimetable(Student student, CSVLoader csvLoader, String courseFile) {
         List<Course> courses = student.getEnrolledCourses();
-        TimetableEntry timetableEntry = new TimetableEntry(courses, planner, csvLoader, courseFile);
+        TimetableEntry timetableEntry = new TimetableEntry(courses, planner, csvLoader, courseFile,false);
         Stage timetableStage = new Stage();
         try {
             timetableEntry.start(timetableStage);
@@ -137,7 +137,7 @@ public class ListingTab {
     }
     
     private void showLectureTimetable(Course course, CSVLoader csvLoader, String courseFile) {
-        TimetableEntry timetableEntry = new TimetableEntry(List.of(course), planner, csvLoader, courseFile);
+        TimetableEntry timetableEntry = new TimetableEntry(List.of(course), planner, csvLoader, courseFile,true);
         Stage timetableStage = new Stage();
         try {
             timetableEntry.start(timetableStage);
@@ -150,7 +150,7 @@ public class ListingTab {
         List<Course> courses = planner.getCourses().stream()
                 .filter(course -> course.getClassroom() != null && course.getClassroom().equals(classroom.getName()))
                 .collect(Collectors.toList());
-        TimetableEntry timetableEntry = new TimetableEntry(courses, planner, csvLoader, courseFile);
+        TimetableEntry timetableEntry = new TimetableEntry(courses, planner, csvLoader, courseFile,false);
         Stage timetableStage = new Stage();
         try {
             timetableEntry.start(timetableStage);

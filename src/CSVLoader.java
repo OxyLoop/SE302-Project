@@ -16,7 +16,7 @@ public class CSVLoader {
             String line;
             while ((line = br.readLine()) != null) {
                 String[] data = line.split(";");
-                if (!data[0].equals("Classroom")) { // Skip header
+                if (!data[0].equals("Classroom")) { 
                     String name = data[0];
                     int capacity = Integer.parseInt(data[1]);
                     classrooms.add(new Classroom(name, capacity));
@@ -32,7 +32,7 @@ public class CSVLoader {
             String line;
             while ((line = br.readLine()) != null) {
                 String[] data = line.split(";");
-                if (!data[0].equals("Course")) { // Skip header
+                if (!data[0].equals("Course")) { 
                     String code = data[0];
                     String timing = data[1];
                     int durationHours = Integer.parseInt(data[2]);
@@ -68,7 +68,7 @@ public class CSVLoader {
     }
 
     private String[] extractStudentNames(String[] data) {
-        // Extract students starting from the 5th column onwards
+       
         String[] studentNames = new String[data.length - 4];
         System.arraycopy(data, 4, studentNames, 0, studentNames.length);
         return studentNames;

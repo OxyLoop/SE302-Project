@@ -38,7 +38,6 @@ public class Course {
           .append(durationHours).append(";")
           .append(lecturer).append(";");
 
-        // Append enrolled students' names
         for (int i = 0; i < enrolledStudents.size(); i++) {
             sb.append(enrolledStudents.get(i).getName());
             if (i < enrolledStudents.size() - 1) {

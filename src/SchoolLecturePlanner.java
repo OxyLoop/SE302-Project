@@ -17,7 +17,6 @@ public class SchoolLecturePlanner {
     private CSVLoader csvLoader;
     private mainApp app;
 
-
     public SchoolLecturePlanner() {
         this.students = new ArrayList<>();
         this.classrooms = new ArrayList<>();
@@ -45,28 +44,28 @@ public class SchoolLecturePlanner {
         int startIndex = findTimeIndex(times, startTime);
         if (startIndex == -1) {
             System.out.println("Invalid start time.");
-            return false; 
+            return false;
         }
     
         int endIndex = startIndex + durationHours - 1;
         if (endIndex >= times.length) {
             System.out.println("Duration exceeds available lecture slots.");
-            return false; 
+            return false;
         }
     
         for (Course course : courses) {
-            // Null kontrolü ekleniyor
             if (course.getClassroom() != null && course.getClassroom().equals(classroomName) && course.getDay().equals(day)) {
                 int courseStartIndex = findTimeIndex(times, course.getTime());
                 int courseEndIndex = courseStartIndex + course.getDurationHours() - 1;
     
+         
                 if ((startIndex <= courseEndIndex) && (endIndex >= courseStartIndex)) {
-                    return false; 
+                    return false;
                 }
             }
         }
     
-        return true; 
+        return true;
     }
     
     private int findTimeIndex(String[] times, String time) {
@@ -82,7 +81,7 @@ public class SchoolLecturePlanner {
     public List<Course> searchCourses(String searchText) {
         List<Course> matchingCourses = new ArrayList<>();
         
-        // Search by course code
+
         for (Course course : courses) {
             if (course.getCode().toLowerCase().contains(searchText.toLowerCase())||
                 course.getLecturer().toLowerCase().contains(searchText.toLowerCase())) {
@@ -140,18 +139,18 @@ public class SchoolLecturePlanner {
     
         public void addCourse(String code, String lecturer, String timing, int durationHours, String classroomName, List<Student> students) {
             Classroom classroom = findClassroomByName(classroomName);
-            if (classroomName == null || classroomName.isEmpty()) {
+            if (classroom == null) {
                 System.out.println("Classroom cannot be null or empty!");
                 return;
             }
         
-            // Validate durationHours
+          
             if (durationHours <= 0) {
                 System.out.println("Invalid duration! Duration must be a positive number of hours.");
                 return;
             }
         
-            // Split and validate timing
+         
             String[] timingParts = timing.split(" ");
             if (timingParts.length != 2) {
                 System.out.println("Invalid timing format! It should be 'Day Time'.");
@@ -160,21 +159,24 @@ public class SchoolLecturePlanner {
             String day = timingParts[0];
             String time = timingParts[1];
         
-            
+
             if (!isClassroomAvailable(classroomName, day, time, durationHours)) {
                 System.out.println("Scheduling conflict detected! Another course is already scheduled in this classroom at this time.");
                 return;
             }
         
-            // Create and add the course
+
             Course course = new Course(code, lecturer, timing, durationHours, classroomName, students);
             courses.add(course);
-        
             classroom.setAvailable(false); 
-            courseMap.put(code, course); 
+            courseMap.put(code, course);
         
             System.out.println("Course added: " + course);
         }
+
+        
+        
+        
         
          
     
@@ -184,6 +186,7 @@ public class SchoolLecturePlanner {
                 courses.remove(courseToRemove);
                 Classroom classroom = findClassroomByName(courseToRemove.getClassroom());
                 if (classroom != null) {
+                  
                     if (courses.stream().noneMatch(course -> course.getClassroom().equals(classroom.getName()))) {
                         classroom.setAvailable(true);
                     }
@@ -213,7 +216,6 @@ public class SchoolLecturePlanner {
         if (!students.contains(student)) { 
             students.add(student);
         }
-        
     }
 
     /*public void enrollStudentToCourse(int studentId, String courseCode) {
@@ -227,6 +229,7 @@ public class SchoolLecturePlanner {
             System.out.println("Student or Course not found!");
         }
     }*/
+    
 
 
     public List<String> getAllStudentNames() {
@@ -264,7 +267,6 @@ public class SchoolLecturePlanner {
     public void addClassroom(String name, int capacity) {
         Classroom classroom = new Classroom(name, capacity);
         classrooms.add(classroom);
-        
         System.out.println("Classroom added: " + classroom);
     }
 
@@ -298,5 +300,8 @@ public class SchoolLecturePlanner {
             System.out.println(classroom.getName());
         }
     }
+
+    
+
 
 }

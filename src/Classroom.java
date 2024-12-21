@@ -46,6 +46,7 @@ public class Classroom {
         this.assignedCourse = assignedCourse;
         this.isAvailable = (assignedCourse == null);
     }
+    
 
 
 
