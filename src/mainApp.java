@@ -216,12 +216,12 @@ public class mainApp extends Application {
 
         Menu helpMenu = new Menu("Help");
 
-        MenuItem aboutMenuItem = new MenuItem("About PagePal");
+        MenuItem aboutMenuItem = new MenuItem("About");
         aboutMenuItem.setOnAction(e -> {
             Alert alert = new Alert(AlertType.INFORMATION);
             alert.setHeaderText("About");
             alert.setContentText(
-                    "This application is made by ..... It is the project of the course SE302.");
+                    "This application is made by Arda Sarı, Akın Savaşçı, Bekir Can Türkmen, İpek Sude Yavaş and Ege Orhan. It is the project of the course SE302.");
             alert.setTitle("About");
             alert.showAndWait();
         });
