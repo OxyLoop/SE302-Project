@@ -14,7 +14,7 @@ public class Course {
         this.code = code;
         this.lecturer = lecturer;
         setDayAndTime(timing);
-        this.classroom = classroom;
+        this.classroom = "No Classroom";
         this.durationHours = durationHours;
         this.enrolledStudents = enrolledStudents != null ? new ArrayList<>(enrolledStudents) : new ArrayList<>();
     }

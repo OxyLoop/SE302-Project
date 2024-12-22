@@ -26,6 +26,7 @@ public class CSVLoader {
             e.printStackTrace();
         }
     }
+    
 
     public void loadCourses(String filename, List<Course> courses, List<Classroom> classrooms, Map<String, Course> courseMap, Map<String, Student> studentMap) {
         try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
@@ -174,13 +175,24 @@ public class CSVLoader {
             e.printStackTrace();
         }
     }
-    public void exportCSV(String filename, List<Course> courses) {
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(filename))) {
+    public void exportCSV(String filepath, List<Course> courses) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filepath))) {
             for (Course course : courses) {
-                bw.write(course.toCsvString() + "\n");
+                StringBuilder line = new StringBuilder();
+                line.append(course.getCode()).append(";")
+                    .append(course.getDay()).append(" ").append(course.getTime()).append(";")
+                    .append(course.getDurationHours()).append(";")
+                    .append(course.getLecturer());
+    
+                for (Student student : course.getEnrolledStudents()) {
+                    line.append(";").append(student.getName());
+                }
+    
+                writer.write(line.toString());
+                writer.newLine();
             }
         } catch (IOException e) {
-            System.err.println("Error exporting courses and students: " + e.getMessage());
+            System.err.println("Error writing to CSV: " + e.getMessage());
         }
     }
 

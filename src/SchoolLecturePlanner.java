@@ -1,3 +1,6 @@
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -12,8 +15,8 @@ public class SchoolLecturePlanner {
     List<Student> students;
     List<Classroom> classrooms;
     List<Course> courses;
-    private Map<String, Course> courseMap; // Course code to Course object map
-    private Map<String, Student> studentMap; // Student name to Student object map
+    private Map<String, Course> courseMap; 
+    private Map<String, Student> studentMap; 
     private CSVLoader csvLoader;
     private mainApp app;
 
@@ -140,17 +143,15 @@ public class SchoolLecturePlanner {
         public void addCourse(String code, String lecturer, String timing, int durationHours, String classroomName, List<Student> students) {
             Classroom classroom = findClassroomByName(classroomName);
             if (classroom == null) {
-                System.out.println("Classroom cannot be null or empty!");
+                classroomName = "No Classroom";
                 return;
             }
         
-          
             if (durationHours <= 0) {
                 System.out.println("Invalid duration! Duration must be a positive number of hours.");
                 return;
             }
         
-         
             String[] timingParts = timing.split(" ");
             if (timingParts.length != 2) {
                 System.out.println("Invalid timing format! It should be 'Day Time'.");
@@ -159,7 +160,6 @@ public class SchoolLecturePlanner {
             String day = timingParts[0];
             String time = timingParts[1];
         
-
             if (!isClassroomAvailable(classroomName, day, time, durationHours)) {
                 System.out.println("Scheduling conflict detected! Another course is already scheduled in this classroom at this time.");
                 return;
@@ -168,12 +168,60 @@ public class SchoolLecturePlanner {
 
             Course course = new Course(code, lecturer, timing, durationHours, classroomName, students);
             courses.add(course);
-            classroom.setAvailable(false); 
+            if (classroom != null) {
+                classroom.setAvailable(false);
+            }
             courseMap.put(code, course);
         
             System.out.println("Course added: " + course);
+        
+         
+            exportCSV("data/Courses.csv", courses);
         }
 
+        public void assignStudentsToCourse(String courseCode, List<String> studentNames, String csvFilePath) {
+            Course course = findCourseByCode(courseCode);
+            if (course == null) {
+                System.out.println("Course not found: " + courseCode);
+                return;
+                
+            }
+        
+            for (String studentName : studentNames) {
+                Student student = findStudentByName(studentName);
+                if (student != null) {
+                    course.addStudent(student); 
+                    student.addCourse(course);  
+                } else {
+                    System.out.println("Student not found: " + studentName);
+                }
+            }
+        
+         
+            exportCSV(csvFilePath, getCourses());
+            System.out.println("CSV updated after assigning students to course: " + courseCode);
+        }
+
+        public void exportCSV(String filepath, List<Course> courses) {
+    try (BufferedWriter writer = new BufferedWriter(new FileWriter(filepath))) {
+        for (Course course : courses) {
+            StringBuilder line = new StringBuilder();
+            line.append(course.getCode()).append(";")
+                .append(course.getDay()).append(" ").append(course.getTime()).append(";")
+                .append(course.getDurationHours()).append(";")
+                .append(course.getLecturer());
+
+            for (Student student : course.getEnrolledStudents()) {
+                line.append(";").append(student.getName());
+            }
+
+            writer.write(line.toString());
+            writer.newLine();
+        }
+    } catch (IOException e) {
+        System.err.println("Error writing to CSV: " + e.getMessage());
+    }
+}
         
         
         
@@ -238,6 +286,21 @@ public class SchoolLecturePlanner {
             studentNames.add(student.getName());
         }
         return studentNames;
+    }
+    public void unassignStudentFromCourse(String courseCode, String studentName) {
+        Course course = findCourseByCode(courseCode);
+        if (course == null) {
+            System.out.println("Course not found: " + courseCode);
+            return;
+        }
+    
+        Student student = findStudentByName(studentName);
+        if (student != null) {
+            course.removeStudent(student); 
+            System.out.println("Student " + studentName + " removed from course: " + courseCode);
+        } else {
+            System.out.println("Student not found: " + studentName);
+        }
     }
 
     public Student findStudentByName(String name) {

@@ -7,8 +7,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-
+import javafx.scene.web.WebEngine;
+import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
+import java.io.InputStream;
+import javafx.stage.FileChooser;
+import java.awt.Desktop;
 import java.io.File;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
@@ -33,16 +37,12 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.web.WebEngine;
-import javafx.scene.web.WebView;
-import javafx.stage.FileChooser;
-import java.io.InputStream;
 import javafx.stage.Stage;
-import java.awt.Desktop;
 //asdasdasdasd
 public class mainApp extends Application {
     
     private SchoolLecturePlanner planner = new SchoolLecturePlanner();
+    private TimetableEntry timetableEntry;
     
     private Label totalStudentsLabel = new Label("Total Students: 0");
     private Label totalCoursesLabel = new Label("Total Courses: 0");
@@ -52,6 +52,8 @@ public class mainApp extends Application {
         totalCoursesLabel.setText(String.valueOf(planner.getCourses().size()));
         totalClassroomsLabel.setText(String.valueOf(planner.getClassrooms().size()));
     }
+    
+    
 
 
     private List<Course> importCSV(String filepath) {
@@ -60,7 +62,7 @@ public class mainApp extends Application {
             String line;
             while ((line = br.readLine()) != null) {
                 String[] parts = line.split(";");
-                if (parts.length >= 5) { 
+                if (parts.length >= 4) { 
                     String code = parts[0];
                     String[] timingParts = parts[1].split(" ");
                     String day = timingParts[0];
@@ -157,7 +159,7 @@ public class mainApp extends Application {
                 String lecturer = course.getLecturer();
                 String timing = course.getDay() + " " + course.getTime(); 
                 int durationHours = course.getDurationHours();
-                String classroomName = course.getClassroom();
+                //String classroomName = course.getClassroom();
     
                 
                 List<Student> enrolledStudents = new ArrayList<>();
@@ -174,8 +176,14 @@ public class mainApp extends Application {
                 }
     
                 
-                planner.addCourse(code, lecturer, timing, durationHours, classroomName, enrolledStudents);
+                planner.addCourse(code, lecturer, timing, durationHours, "No Classroom", enrolledStudents);
             }
+            updateDashboard(); 
+
+            ListingTab listingTab = new ListingTab(planner, "lectures");
+             listingTab.show();
+
+
             System.out.println("Courses imported from CSV.");
         }
     }
@@ -195,10 +203,10 @@ public class mainApp extends Application {
     @Override
     //MAIN TAB FOR APPLICATION
     public void start(Stage primaryStage) {
-        
         planner.loadClassrooms("data/ClassroomCapacity.csv");
         planner.loadCourses("data/Courses.csv");
         primaryStage.setTitle("School Lecture Planner");
+
         BorderPane root = new BorderPane();
         root.setStyle("-fx-background-color: #001f3f");
 
@@ -221,12 +229,11 @@ public class mainApp extends Application {
             Alert alert = new Alert(AlertType.INFORMATION);
             alert.setHeaderText("About");
             alert.setContentText(
-                    "This application is made by Arda Sarı, Akın Savaşçı, Bekir Can Türkmen, İpek Sude Yavaş and Ege Orhan. It is the project of the course SE302.");
+                "This application is made by Arda Sarı, Akın Savaşçı, Bekir Can Türkmen, İpek Sude Yavaş and Ege Orhan. It is the project of the course SE302.");
             alert.setTitle("About");
             alert.showAndWait();
         });
         MenuItem manualMenuItem = new MenuItem("Manual");
-
         manualMenuItem.setOnAction(e -> {
             try {
                 File pdfFile = new File("src/resources/UserManual.pdf");
@@ -243,8 +250,6 @@ public class mainApp extends Application {
                 ex.printStackTrace();
             }
         });
-
-    
         helpMenu.getItems().addAll(aboutMenuItem, manualMenuItem);
 
         Menu addMenu = new Menu("New");
@@ -254,17 +259,22 @@ public class mainApp extends Application {
 
         MenuItem addClassItem = new MenuItem("Add Class");
         addClassItem.setOnAction(event -> openAddClassWindow());
-        MenuItem assignCourseItem = new MenuItem("Assign Course");
-        assignCourseItem.setOnAction(event -> openAssignCourseWindow());
-        addMenu.getItems().add(assignCourseItem); // Add menu item to "New" menu
+        MenuItem assignStudentsMenuItem = new MenuItem("Assign Students");
+        assignStudentsMenuItem.setOnAction(event -> openAssignStudentsWindow());
+        addMenu.getItems().add(assignStudentsMenuItem); 
+
+        assignStudentsMenuItem.setOnAction(event -> openAssignStudentsWindow());
         MenuItem unassignCourseItem = new MenuItem("Unassign Course");
         unassignCourseItem.setOnAction(event -> openUnassignCourseWindow());
         addMenu.getItems().add(unassignCourseItem);
 
         addMenu.getItems().addAll(addCourseItem,addClassItem);
-
+        MenuItem addStudentItem = new MenuItem("Add Student");
+        addStudentItem.setOnAction(event -> openAddStudentWindow());
+        addMenu.getItems().add(addStudentItem);
         menuBar.getMenus().addAll(fileMenu,addMenu,helpMenu);
 
+    
         VBox topContainer = new VBox(menuBar);
 
         HBox dashboard = new HBox(20);
@@ -309,6 +319,12 @@ public class mainApp extends Application {
             "-fx-text-fill: #ffffff;" +
             "-fx-padding: 10;"
         );
+
+
+        
+
+
+        
 
         Button studentButton = new Button("Students");
         studentButton.setStyle(
@@ -378,7 +394,7 @@ public class mainApp extends Application {
         Label title = new Label("Unassign Students");
         title.setStyle("-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #001f3f;");
     
-        // Ders Seçimi
+      
         Label courseLabel = new Label("Select Course:");
         ChoiceBox<String> courseChoiceBox = new ChoiceBox<>();
         courseChoiceBox.getItems().addAll(
@@ -428,12 +444,12 @@ public class mainApp extends Application {
         unassignButton.setOnAction(event -> {
             String selectedCourseCode = courseChoiceBox.getValue();
             String selectedClassroomName = classroomChoiceBox.getValue();
-    
+        
             if (selectedCourseCode == null || selectedClassroomName == null || selectedStudents.isEmpty()) {
                 System.out.println("Please select a course, classroom, and at least one student.");
                 return;
             }
-    
+        
             Course course = planner.findCourseByCode(selectedCourseCode);
             if (course != null) {
                 for (String studentName : selectedStudents) {
@@ -442,14 +458,22 @@ public class mainApp extends Application {
                         course.removeStudent(student); 
                     }
                 }
+        
+                
+                updateCSVFile("data/Courses.csv", planner.getCourses());
                 System.out.println("Selected students removed from course: " + selectedCourseCode);
-                updateDashboard();
+            } else {
+                System.out.println("Course not found: " + selectedCourseCode);
             }
-    
+            if (timetableEntry == null) {
+                timetableEntry = new TimetableEntry(planner.getCourses(), planner, new CSVLoader(), "data/Courses.csv", true);
+            }
+            timetableEntry.updateTimetable();
             selectedStudents.clear(); 
             unassignWindow.close();
         });
     
+
   
         HBox studentButtons = new HBox(10, addStudentButton, removeStudentButton);
         studentButtons.setStyle("-fx-alignment: center;");
@@ -469,8 +493,33 @@ public class mainApp extends Application {
         unassignWindow.setTitle("Unassign Students");
         unassignWindow.show();
     }
+    private void updateCSVFile(String filePath, List<Course> courses) {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePath))) {
+            for (Course course : courses) {
+                
+                StringBuilder line = new StringBuilder();
+                line.append(course.getCode()).append(";")
+                    .append(course.getDay()).append(" ").append(course.getTime()).append(";")
+                    .append(course.getDurationHours()).append(";")
+                    .append(course.getLecturer()).append(";");
     
+                
+                List<Student> students = course.getEnrolledStudents();
+                for (int i = 0; i < students.size(); i++) {
+                    line.append(students.get(i).getName());
+                    if (i < students.size() - 1) {
+                        line.append(";");
+                    }
+                }
     
+                bw.write(line.toString());
+                bw.newLine();
+            }
+            System.out.println("CSV updated successfully.");
+        } catch (IOException e) {
+            System.err.println("Error updating CSV file: " + e.getMessage());
+        }
+    }
     private void updateStudentList(ChoiceBox<String> courseChoiceBox, ChoiceBox<String> classroomChoiceBox, ListView<String> studentListView) {
         String selectedCourseCode = courseChoiceBox.getValue();
         String selectedClassroomName = classroomChoiceBox.getValue();
@@ -488,97 +537,88 @@ public class mainApp extends Application {
             studentListView.getItems().clear();
         }
     }
+    private void openAddStudentWindow() {
+        Stage addStudentStage = new Stage();
+        VBox vbox = new VBox(10);
+        vbox.setStyle("-fx-alignment: center; -fx-padding: 20;");
     
-
-    private void openAssignCourseWindow() {
+        Label titleLabel = new Label("Add Student");
+        titleLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+    
+        Label nameLabel = new Label("Student Name:");
+        TextField nameField = new TextField();
+        nameField.setPromptText("Enter student name");
+    
+        Button addButton = new Button("Add Student");
+        addButton.setOnAction(event -> {
+            String studentName = nameField.getText().trim();
+            if (!studentName.isEmpty()) {
+                Student newStudent = new Student(studentName);
+                planner.addStudent(newStudent); 
+    
+                updateDashboard(); 
+                addStudentStage.close(); 
+                System.out.println("Student added: " + studentName);
+            } else {
+                System.out.println("Student name cannot be empty!");
+            }
+        });
+    
+        vbox.getChildren().addAll(titleLabel, nameLabel, nameField, addButton);
+    
+        Scene scene = new Scene(vbox, 300, 200);
+        addStudentStage.setScene(scene);
+        addStudentStage.setTitle("Add Student");
+        addStudentStage.show();
+    }
+    
+    private void openAssignStudentsWindow() {
         Stage assignWindow = new Stage();
         VBox vbox = new VBox(10);
         vbox.setStyle("-fx-alignment: center; -fx-padding: 20;");
     
-        Label title = new Label("Assign Course");
-        title.setStyle("-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #001f3f;");
+        Label title = new Label("Assign Students to Course");
+        title.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
     
-
         Label courseLabel = new Label("Select Course:");
         ChoiceBox<String> courseChoiceBox = new ChoiceBox<>();
         courseChoiceBox.getItems().addAll(
             planner.getCourses().stream().map(Course::getCode).collect(Collectors.toList())
         );
     
- 
-        Label classroomLabel = new Label("Select Classroom:");
-        ChoiceBox<String> classroomChoiceBox = new ChoiceBox<>();
-        classroomChoiceBox.getItems().addAll(planner.getClassroomNames());
-    
-     
-        Label studentLabel = new Label("Select Students:");
+        Label studentsLabel = new Label("Select Students:");
         ListView<String> studentListView = new ListView<>();
-        studentListView.getItems().addAll(planner.getAllStudentNames());
- 
-        Label selectedLabel = new Label("Selected Students:");
-        ListView<String> selectedStudentsListView = new ListView<>();
-        ObservableList<String> selectedStudentsList = FXCollections.observableArrayList();
-        selectedStudentsListView.setItems(selectedStudentsList);
+        studentListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        studentListView.getItems().addAll(
+            planner.getStudents().stream().map(Student::getName).collect(Collectors.toList())
+        );
     
-   
-        Button addStudentButton = new Button("Add Student");
-        addStudentButton.setOnAction(event -> {
-            String selectedStudent = studentListView.getSelectionModel().getSelectedItem();
-            if (selectedStudent != null && !selectedStudentsList.contains(selectedStudent)) {
-                selectedStudentsList.add(selectedStudent);
-            }
-        });
-    
-
-        Button removeStudentButton = new Button("Remove Student");
-        removeStudentButton.setOnAction(event -> {
-            String selectedStudent = selectedStudentsListView.getSelectionModel().getSelectedItem();
-            selectedStudentsList.remove(selectedStudent);
-        });
-    
- 
         Button assignButton = new Button("Assign");
         assignButton.setOnAction(event -> {
             String selectedCourseCode = courseChoiceBox.getValue();
-            String selectedClassroomName = classroomChoiceBox.getValue();
-            if (selectedCourseCode != null && selectedClassroomName != null && !selectedStudentsList.isEmpty()) {
-                Course course = planner.findCourseByCode(selectedCourseCode);
-                Classroom classroom = planner.findClassroomByName(selectedClassroomName);
+            ObservableList<String> selectedStudentNames = studentListView.getSelectionModel().getSelectedItems();
     
-                if (course != null && classroom != null) {
-                    for (String studentName : selectedStudentsList) {
-                        Student student = planner.findStudentByName(studentName);
-                        if (student != null) {
-                            course.addStudent(student); 
-                        }
-                    }
-                    System.out.println("Course successfully assigned to selected students and classroom!");
-                }
+            if (selectedCourseCode != null && !selectedStudentNames.isEmpty()) {
+                planner.assignStudentsToCourse(
+                    selectedCourseCode,
+                    new ArrayList<>(selectedStudentNames),
+                    "data/Courses.csv" // Pass the path to update CSV
+                );
+                System.out.println("Students assigned successfully!");
+                assignWindow.close();
             } else {
-                System.out.println("Please select a course, classroom, and at least one student.");
+                System.out.println("Please select a course and at least one student.");
             }
-    
-            assignWindow.close();
         });
     
-        HBox studentButtons = new HBox(10, addStudentButton, removeStudentButton);
-        studentButtons.setStyle("-fx-alignment: center;");
+        vbox.getChildren().addAll(title, courseLabel, courseChoiceBox, studentsLabel, studentListView, assignButton);
     
-        vbox.getChildren().addAll(
-            title,
-            courseLabel, courseChoiceBox,
-            classroomLabel, classroomChoiceBox,
-            studentLabel, studentListView,
-            studentButtons,
-            selectedLabel, selectedStudentsListView,
-            assignButton
-        );
-    
-        Scene scene = new Scene(vbox, 400, 600);
+        Scene scene = new Scene(vbox, 400, 500);
         assignWindow.setScene(scene);
-        assignWindow.setTitle("Assign Course");
+        assignWindow.setTitle("Assign Students");
         assignWindow.show();
     }
+    
     
     
     
@@ -678,52 +718,44 @@ public class mainApp extends Application {
     
     Button addButton = new Button("Add Course");
     addButton.setOnAction(event -> {
-    String code = codeField.getText().trim();
-    String lecturer = lecturerComboBox.getValue();
-    String day = dayChoiceBox.getValue();
-    String time = timeChoiceBox.getValue();
-    String duration = durationChoiceBox.getValue();
-    String classroom = classroomComboBox.getValue();
-
+        String code = codeField.getText().trim();
+        String lecturer = lecturerComboBox.getValue();
+        String day = dayChoiceBox.getValue();
+        String time = timeChoiceBox.getValue();
+        String duration = durationChoiceBox.getValue();
+        String classroom = classroomComboBox.getValue();
     
-    ObservableList<String> selectedStudentNames = FXCollections.observableArrayList(studentListView.getSelectionModel().getSelectedItems());
-    List<Student> selectedStudents = new ArrayList<>();
-
-    if (!code.isEmpty() && !lecturer.isEmpty() && !day.isEmpty() && !time.isEmpty() && !duration.isEmpty() && classroom != null) {
-        try {
-            int durationHours = Integer.parseInt(duration.split(" ")[0]);
-            String timing = day + " " + time; 
-
-           
-            for (String studentName : selectedStudentNames) {
-                
-                Student existingStudent = planner.findStudentByName(studentName);
-                if (existingStudent != null) {
-                    selectedStudents.add(existingStudent); 
-                } else {
-                    
-                    Student newStudent = new Student(studentName);
-                    planner.addStudent(newStudent);
-                    selectedStudents.add(newStudent);
+        ObservableList<String> selectedStudentNames = FXCollections.observableArrayList(studentListView.getSelectionModel().getSelectedItems());
+        List<Student> selectedStudents = new ArrayList<>();
+    
+        if (!code.isEmpty() && !lecturer.isEmpty() && !day.isEmpty() && !time.isEmpty() && !duration.isEmpty() && classroom != null) {
+            try {
+                int durationHours = Integer.parseInt(duration.split(" ")[0]);
+                String timing = day + " " + time;
+    
+                for (String studentName : selectedStudentNames) {
+                    Student existingStudent = planner.findStudentByName(studentName);
+                    if (existingStudent != null) {
+                        selectedStudents.add(existingStudent);
+                    } else {
+                        Student newStudent = new Student(studentName);
+                        planner.addStudent(newStudent);
+                        selectedStudents.add(newStudent);
+                    }
                 }
+    
+                
+                planner.addCourse(code, lecturer, timing, durationHours, classroom, selectedStudents);
+    
+                updateDashboard(); 
+                newWindow.close(); 
+            } catch (NumberFormatException e) {
+                System.out.println("Duration must be a valid number!");
             }
-
-           
-            planner.addCourse(code, lecturer, timing, durationHours, classroom, selectedStudents);
-
-           
-            CSVLoader loader = new CSVLoader();
-            Course course = new Course(code, lecturer, timing, durationHours, classroom, selectedStudents);
-            loader.writeCourseToFile(course, "data/Courses.csv");
-            updateDashboard();
-            newWindow.close(); 
-        } catch (NumberFormatException e) {
-            System.out.println("Duration must be a valid number!");
+        } else {
+            System.out.println("All fields are required!");
         }
-    } else {
-        System.out.println("All fields are required!");
-    }
-});
+    });
 
     
 
@@ -822,6 +854,8 @@ public class mainApp extends Application {
 
     public static void main (String[]args){
         launch(args);
+        
+
     }
 }
 
