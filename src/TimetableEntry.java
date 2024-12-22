@@ -83,9 +83,10 @@ public class TimetableEntry extends Application {
     }
 
     private GridPane createTimetableGrid() {
-        for (Course course : filteredCourses) {
+        // Remove or comment out this debug print loop
+        /*for (Course course : filteredCourses) {
             System.out.println("Course: " + course.getCode() + ", Time: " + course.getTime() + ", Day: " + course.getDay());
-        }
+        }*/
 
         GridPane grid = new GridPane();
         grid.setGridLinesVisible(true);
@@ -139,19 +140,6 @@ public class TimetableEntry extends Application {
         AtomicInteger rowIndex = new AtomicInteger(startRow);
     
         for (int i = 0; i < duration; i++) {
-            // Eğer bu saat dilimi zaten doluysa ekleme
-            if (grid.getChildren().stream().anyMatch(node -> {
-                Integer nodeCol = GridPane.getColumnIndex(node);
-                Integer nodeRow = GridPane.getRowIndex(node);
-    
-                return (nodeCol != null && nodeCol == col) &&
-                       (nodeRow != null && nodeRow == rowIndex.get());
-            })) {
-                System.out.println("Conflict detected for course: " + course.getCode());
-                rowIndex.incrementAndGet();
-                continue;
-            }
-    
             Button hourButton = new Button(course.getCode() + " (" + (i + 1) + "h)");
             hourButton.setStyle("-fx-border-color: black; -fx-padding: 10; -fx-background-color: lightblue; -fx-alignment: center;");
     
@@ -210,7 +198,6 @@ public class TimetableEntry extends Application {
 
     private void openEditForm(Course course, Stage parentStage) {
         Stage editStage = new Stage();
-
         VBox vbox = new VBox(10);
         vbox.setStyle("-fx-alignment: center; -fx-padding: 20;");
 
@@ -240,23 +227,53 @@ public class TimetableEntry extends Application {
             String selectedDay = dayChoice.getValue();
             String selectedTime = timeChoice.getValue();
             int selectedDuration = Integer.parseInt(durationChoice.getValue().split(" ")[0]);
-        
-            if (!isTimeSlotAvailable(selectedDay, selectedTime, selectedDuration, course.getCode())) {
-                System.out.println("Time slot conflict detected! Please choose another time.");
-                return; 
+
+            // Sınıf ve hoca çakışma kontrolü
+            if (!planner.isClassroomAvailable(selectedDay, selectedTime, selectedDuration, 
+                    course.getCode(), course.getClassroom(), course.getLecturer())) {
+                System.out.println("Cannot update: Time slot conflict detected!");
+                return;
             }
-        
-         
-            course.setDay(selectedDay);
-            course.setTime(selectedTime);
-            course.setDurationHours(selectedDuration);
-        
-            csvLoader.exportCSV(courseFile, planner.getCourses());
-            editStage.close();
-            parentStage.close();
-            updateTimetable();
+
+            // Öğrenci çakışma kontrolü
+            boolean studentConflict = false;
+            for (Student student : course.getEnrolledStudents()) {
+                for (Course enrolledCourse : student.getEnrolledCourses()) {
+                    if (enrolledCourse.getCode().equals(course.getCode())) continue;
+                    
+                    if (enrolledCourse.getDay().equals(selectedDay)) {
+                        int existingStartIndex = getRowForTime(enrolledCourse.getTime());
+                        int existingEndIndex = existingStartIndex + enrolledCourse.getDurationHours() - 1;
+                        int newStartIndex = getRowForTime(selectedTime);
+                        int newEndIndex = newStartIndex + selectedDuration - 1;
+
+                        if ((newStartIndex <= existingEndIndex) && (newEndIndex >= existingStartIndex)) {
+                            System.out.println("Cannot update: Student " + student.getName() + 
+                                " has another course at this time: " + enrolledCourse.getCode());
+                            studentConflict = true;
+                            break;
+                        }
+                    }
+                }
+                if (studentConflict) break;
+            }
+
+            if (!studentConflict) {
+                course.setDay(selectedDay);
+                course.setTime(selectedTime);
+                course.setDurationHours(selectedDuration);
+                csvLoader.exportCSV(courseFile, planner.getCourses());
+                editStage.close();
+                parentStage.close();
+                updateTimetable();
+            }
         });
-        vbox.getChildren().addAll(editLabel, new Label("Day:"), dayChoice, new Label("Time:"), timeChoice, new Label("Duration:"), durationChoice, saveButton);
+
+        vbox.getChildren().addAll(editLabel, 
+            new Label("Day:"), dayChoice, 
+            new Label("Time:"), timeChoice, 
+            new Label("Duration:"), durationChoice, 
+            saveButton);
 
         Scene editScene = new Scene(vbox, 300, 250);
         editStage.setScene(editScene);
@@ -270,20 +287,22 @@ public class TimetableEntry extends Application {
             return;
         }
     
-
+        // Clear all existing course buttons
         gridPane.getChildren().removeIf(node -> node instanceof Button);
     
-
-        for (Course course : filteredCourses) {
-            if (course.getEnrolledStudents().isEmpty()) {
-                System.out.println("No students in course: " + course.getCode());
-                continue;
-            }
-    
-            int col = getColumnForDay(course.getDay());
-            int startRow = getRowForTime(course.getTime());
-            if (col != -1 && startRow != -1) {
-                addClassToGrid(gridPane, course, col, startRow, course.getDurationHours());
+        // Refresh filtered courses from the current state
+        if (filteredCourses != null) {
+            filteredCourses = filteredCourses.stream()
+                .filter(course -> !course.getEnrolledStudents().isEmpty())
+                .collect(Collectors.toList());
+                
+            // Re-add courses to grid
+            for (Course course : filteredCourses) {
+                int col = getColumnForDay(course.getDay());
+                int startRow = getRowForTime(course.getTime());
+                if (col != -1 && startRow != -1) {
+                    addClassToGrid(gridPane, course, col, startRow, course.getDurationHours());
+                }
             }
         }
     }

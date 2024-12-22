@@ -176,4 +176,10 @@ public class ListingTab {
         stage.setTitle("Course List");
         stage.show();
     }
+
+    public void refreshTimetableViews(Student student) {
+        List<Course> updatedCourses = student.getEnrolledCourses();
+        TimetableEntry timetableEntry = new TimetableEntry(updatedCourses, planner, csvLoader, courseFile, false);
+        timetableEntry.updateTimetable();
+    }
 }

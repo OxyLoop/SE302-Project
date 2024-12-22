@@ -38,46 +38,58 @@ public class SchoolLecturePlanner {
         students.addAll(studentMap.values());
     }
 
-    public boolean isClassroomAvailable(String classroomName, String day, String startTime, int durationHours) {
+    public boolean isClassroomAvailable(String day, String time, int durationHours, String courseCode, String classroomName, String lecturer) {
         String[] times = {
             "08:30", "09:25", "10:20", "11:15", "12:10", "13:05", "14:00", "14:55",
             "15:50", "16:45", "17:40", "18:35", "19:30", "20:25", "21:20", "22:15"
         };
-    
-        int startIndex = findTimeIndex(times, startTime);
-        if (startIndex == -1) {
-            System.out.println("Invalid start time.");
-            return false;
-        }
-    
-        int endIndex = startIndex + durationHours - 1;
-        if (endIndex >= times.length) {
-            System.out.println("Duration exceeds available lecture slots.");
-            return false;
-        }
-    
-        for (Course course : courses) {
-            if (course.getClassroom() != null && course.getClassroom().equals(classroomName) && course.getDay().equals(day)) {
-                int courseStartIndex = findTimeIndex(times, course.getTime());
-                int courseEndIndex = courseStartIndex + course.getDurationHours() - 1;
-    
-         
-                if ((startIndex <= courseEndIndex) && (endIndex >= courseStartIndex)) {
+        
+        int newStartIndex = findTimeIndex(times, time);
+        if (newStartIndex == -1) return false;  // Geçersiz zaman
+        int newEndIndex = newStartIndex + durationHours - 1;
+        if (newEndIndex >= times.length) return false;  // Süre çok uzun
+        
+        for (Course existingCourse : courses) {
+            if (existingCourse.getCode().equals(courseCode)) continue;
+            
+            // Sınıf çakışması kontrolü
+            if (existingCourse.getClassroom().equals(classroomName) && 
+                existingCourse.getDay().equals(day)) {
+                
+                int existingStartIndex = findTimeIndex(times, existingCourse.getTime());
+                int existingEndIndex = existingStartIndex + existingCourse.getDurationHours() - 1;
+                
+                if ((newStartIndex <= existingEndIndex) && (newEndIndex >= existingStartIndex)) {
+                    System.out.println("Classroom conflict: " + classroomName + " is already booked for " + 
+                                     existingCourse.getCode() + " at this time");
+                    return false;
+                }
+            }
+            
+            // Hoca çakışması kontrolü
+            if (existingCourse.getLecturer().equals(lecturer) && 
+                existingCourse.getDay().equals(day)) {
+                
+                int existingStartIndex = findTimeIndex(times, existingCourse.getTime());
+                int existingEndIndex = existingStartIndex + existingCourse.getDurationHours() - 1;
+                
+                if ((newStartIndex <= existingEndIndex) && (newEndIndex >= existingStartIndex)) {
+                    System.out.println("Lecturer conflict: " + lecturer + " is already teaching " + 
+                                     existingCourse.getCode() + " at this time");
                     return false;
                 }
             }
         }
-    
-        return true;
+        return true;  // Çakışma yok
     }
     
     private int findTimeIndex(String[] times, String time) {
         for (int i = 0; i < times.length; i++) {
             if (times[i].equals(time)) {
-                return i; 
+                return i;
             }
         }
-        return -1; 
+        return -1;
     }
     
     
@@ -143,7 +155,7 @@ public class SchoolLecturePlanner {
         public void addCourse(String code, String lecturer, String timing, int durationHours, String classroomName, List<Student> students) {
             Classroom classroom = findClassroomByName(classroomName);
             if (classroom == null) {
-                classroomName = "No Classroom";
+                System.out.println("Classroom not found: " + classroomName);
                 return;
             }
         
@@ -160,46 +172,67 @@ public class SchoolLecturePlanner {
             String day = timingParts[0];
             String time = timingParts[1];
         
-            if (!isClassroomAvailable(classroomName, day, time, durationHours)) {
-                System.out.println("Scheduling conflict detected! Another course is already scheduled in this classroom at this time.");
-                return;
+            if (!isClassroomAvailable(day, time, durationHours, code, classroomName, lecturer)) {
+                return;  // The error message is already printed in isClassroomAvailable
             }
-        
 
             Course course = new Course(code, lecturer, timing, durationHours, classroomName, students);
             courses.add(course);
-            if (classroom != null) {
-                classroom.setAvailable(false);
-            }
             courseMap.put(code, course);
-        
-            System.out.println("Course added: " + course);
-        
-         
+            
             exportCSV("data/Courses.csv", courses);
+            System.out.println("Course added successfully: " + code);
         }
 
         public void assignStudentsToCourse(String courseCode, List<String> studentNames, String csvFilePath) {
-            Course course = findCourseByCode(courseCode);
-            if (course == null) {
+            Course courseToAssign = findCourseByCode(courseCode);
+            if (courseToAssign == null) {
                 System.out.println("Course not found: " + courseCode);
                 return;
-                
             }
-        
+
             for (String studentName : studentNames) {
                 Student student = findStudentByName(studentName);
                 if (student != null) {
-                    course.addStudent(student); 
-                    student.addCourse(course);  
+                    // Öğrencinin mevcut derslerinde çakışma kontrolü
+                    boolean hasConflict = false;
+                    for (Course enrolledCourse : student.getEnrolledCourses()) {
+                        if (enrolledCourse.getDay().equals(courseToAssign.getDay())) {
+                            int existingStartIndex = findTimeIndex(getTimes(), enrolledCourse.getTime());
+                            int existingEndIndex = existingStartIndex + enrolledCourse.getDurationHours() - 1;
+                            
+                            int newStartIndex = findTimeIndex(getTimes(), courseToAssign.getTime());
+                            int newEndIndex = newStartIndex + courseToAssign.getDurationHours() - 1;
+                            
+                            if ((newStartIndex <= existingEndIndex) && (newEndIndex >= existingStartIndex)) {
+                                System.out.println("Time conflict for student " + studentName + 
+                                    ": Already enrolled in " + enrolledCourse.getCode() + 
+                                    " at the same time.");
+                                hasConflict = true;
+                                break;
+                            }
+                        }
+                    }
+                    
+                    if (!hasConflict) {
+                        courseToAssign.addStudent(student);
+                        student.addCourse(courseToAssign);
+                    }
                 } else {
                     System.out.println("Student not found: " + studentName);
                 }
             }
-        
-         
+
             exportCSV(csvFilePath, getCourses());
             System.out.println("CSV updated after assigning students to course: " + courseCode);
+        }
+
+        // Yardımcı metod - zaman dizisini döndürür
+        private String[] getTimes() {
+            return new String[] {
+                "08:30", "09:25", "10:20", "11:15", "12:10", "13:05", "14:00", "14:55",
+                "15:50", "16:45", "17:40", "18:35", "19:30", "20:25", "21:20", "22:15"
+            };
         }
 
         public void exportCSV(String filepath, List<Course> courses) {
