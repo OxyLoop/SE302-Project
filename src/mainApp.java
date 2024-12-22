@@ -255,23 +255,21 @@ public class mainApp extends Application {
         MenuItem addClassItem = new MenuItem("Add Class");
         addClassItem.setOnAction(event -> openAddClassWindow());
         MenuItem assignCourseItem = new MenuItem("Assign Course");
-assignCourseItem.setOnAction(event -> openAssignCourseWindow());
-addMenu.getItems().add(assignCourseItem); // Add menu item to "New" menu
-MenuItem unassignCourseItem = new MenuItem("Unassign Course");
-unassignCourseItem.setOnAction(event -> openUnassignCourseWindow());
-addMenu.getItems().add(unassignCourseItem);
+        assignCourseItem.setOnAction(event -> openAssignCourseWindow());
+        addMenu.getItems().add(assignCourseItem); // Add menu item to "New" menu
+        MenuItem unassignCourseItem = new MenuItem("Unassign Course");
+        unassignCourseItem.setOnAction(event -> openUnassignCourseWindow());
+        addMenu.getItems().add(unassignCourseItem);
 
         addMenu.getItems().addAll(addCourseItem,addClassItem);
 
         menuBar.getMenus().addAll(fileMenu,addMenu,helpMenu);
 
-    
-        HBox topButtonBox = new HBox(20); 
-        VBox topContainer = new VBox(menuBar,topButtonBox);
+        VBox topContainer = new VBox(menuBar);
 
         HBox dashboard = new HBox(20);
         dashboard.setAlignment(Pos.CENTER);
-        dashboard.setStyle("-fx-padding: 20;");
+        dashboard.setStyle("-fx-padding: 10;");
         VBox studentsBox = new VBox(5);
         studentsBox.setStyle("-fx-background-color: white; -fx-padding: 10; -fx-border-color: black; -fx-border-width: 2; -fx-border-radius: 5; -fx-background-radius: 5;");
         Label studentsLabel = new Label("Total Students");
@@ -293,7 +291,7 @@ addMenu.getItems().add(unassignCourseItem);
         dashboard.getChildren().addAll(studentsBox, coursesBox, classroomsBox);
         VBox dashboardContainer = new VBox(dashboard);
         dashboardContainer.setAlignment(Pos.CENTER);
-        dashboardContainer.setStyle("-fx-padding: 20;");
+        dashboardContainer.setStyle("-fx-padding: 10;");
         topContainer.getChildren().add(dashboardContainer);
 
         root.setTop(topContainer);
@@ -301,22 +299,16 @@ addMenu.getItems().add(unassignCourseItem);
 
 
 
-        VBox vbox = new VBox(20);
+        VBox vbox = new VBox(10);
         vbox.setStyle("-fx-alignment: center;");
 
         Label title = new Label("Timetable");
         title.setStyle(
-            "-fx-font-size: 24px;" +
+            "-fx-font-size: 100px;" +
             "-fx-font-weight: bold;" +
             "-fx-text-fill: #ffffff;" +
             "-fx-padding: 10;"
         );
-
-
-        
-
-
-        
 
         Button studentButton = new Button("Students");
         studentButton.setStyle(
@@ -830,62 +822,6 @@ addMenu.getItems().add(unassignCourseItem);
 
     public static void main (String[]args){
         launch(args);
-        //SchoolLecturePlanner planner = new SchoolLecturePlanner();
-        //planner.loadClassrooms("data/ClassroomCapacity.csv"); //CSVLER DATA FOLDERINDA !!!!!!!!!!
-        //planner.loadCourses("data/Courses.csv");
-
-        /* planner.addClassroom(1, "A101", 30);
-        planner.addClassroom(2, "B202", 25);
-
-        planner.addCourse("Math 101", "MATH101", "Dr. Smith", "09:00-11:00", "A101");
-        planner.addCourse("Physics 101", "PHYS101", "Dr. Brown", "11:00-13:00", "B202");
-
-        planner.addStudent(1, "Alice");
-        planner.addStudent(2, "Bob");
-
-        planner.enrollStudentToCourse(1, "MATH101");
-        planner.enrollStudentToCourse(2, "PHYS101");
-
-        System.out.println("-- al lessons --");
-        planner.listCourses();
-
-        System.out.println("-- all stnds --");
-        planner.listStudents();
-
-        System.out.println("-- all clss --");
-        planner.listClassrooms();
-
-
-        System.out.println("removemath101");
-        planner.removeCourse("MATH101");
-
-        System.out.println("-- güncel lesson list --");
-        planner.listCourses();
-        System.out.println("-- Güncel class list --");
-        planner.listClassrooms();
-
-
-        //csvden cekme testleri lutfen sonra silin!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        planner.loadClassrooms("data/ClassroomCapacity.csv"); //CSVLER DATA FOLDERINDA !!!!!!!!!!
-        planner.loadCourses("data/Courses.csv");
-
-        // Print loaded data for verification
-       /*for (Classroom classroom : planner.classrooms) {
-            System.out.println("Classroom: " + classroom.getName() + ", Capacity: " + classroom.getCapacity() + ", Available: " + classroom.isAvailable());
-        }
-        for (Course course : planner.courses) {
-            System.out.println("Course: " + course.getName() + ", Timing: " + course.getTiming() + ", Lecturer: " + course.getLecturer() + ", Classroom: " + course.getClassroom());
-        }
-        for (Student student : planner.students) {
-            System.out.print("Student: " + student.getName() + " (ID: " + student.getId() + ") Enrolled Courses: ");
-            for (Course course : student.getEnrolledCourses()) {
-                System.out.print(course.getName() + " ");
-            }
-            System.out.println();
-        }
-            */
-        
-
     }
 }
 
